@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import get_settings
 from app.database import init_db
-from app.api import auth, parcels, analytics, chat, export_report
+from app.api import auth, parcels, analytics, chat, export_report, census
 # Ensure all models are registered with Base before init_db()
 from app.models import user as _user, parcel as _parcel  # noqa: F401
 
@@ -35,6 +35,7 @@ if _rx:
     _cors_kw["allow_origin_regex"] = _rx
 app.add_middleware(CORSMiddleware, **_cors_kw)
 
+app.include_router(census.router)
 app.include_router(auth.router)
 app.include_router(parcels.router)
 app.include_router(analytics.router)

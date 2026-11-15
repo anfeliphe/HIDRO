@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { CheckCircle2, Database, Map, Upload, Download, AlertCircle } from 'lucide-react';
 import * as api from '../api/client';
 
@@ -107,6 +108,11 @@ P-0003,Mixed-use,6,40.714,-74.004`;
 
   return (
     <div className="h-full flex flex-col">
+      <div className="m-4 p-4 rounded-xl bg-teal-50 border border-teal-200 text-teal-900">
+        <strong>¿Tienes el modelo propuesto de Monitor Ciudad?</strong>
+        <p className="text-sm mt-1">Sus 26 columnas se importan y consultan en el módulo de caracterización.</p>
+        <Link className="inline-block mt-2 font-semibold underline" to="/monitor-ciudad">Abrir Monitor Ciudad →</Link>
+      </div>
       <div className="px-4 sm:px-6 pt-6 pb-4 bg-white/90 backdrop-blur-md border-b border-gray-200/60 lg:pl-6 pl-16 animate-fade-in">
         <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
           Data Sources

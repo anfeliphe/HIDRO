@@ -25,6 +25,7 @@ const SidebarNavigation = ({ isCollapsed, onToggle }) => {
   ];
   
   const dataItems = [
+    { path: '/monitor-ciudad', icon: Database, label: 'Monitor Ciudad' },
     { path: '/parcels', icon: Building2, label: 'Parcels' },
     { path: '/data-sources', icon: Database, label: 'Data Sources' },
   ];

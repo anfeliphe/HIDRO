@@ -8,6 +8,7 @@ import Chat from './pages/Chat';
 import Parcels from './pages/Parcels';
 import Settings from './pages/Settings';
 import DataSources from './pages/DataSources';
+import Census from './pages/Census';
 import Profile from './pages/Profile';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
@@ -42,6 +43,7 @@ function AppRoutes() {
           }
         >
           <Route index element={<Dashboard />} />
+          <Route path="monitor-ciudad" element={<Census />} />
           <Route path="map" element={<MapView />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="chat" element={<Chat />} />

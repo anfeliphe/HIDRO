@@ -40,7 +40,7 @@ const DashboardLayout = () => {
         onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
       />
       <div className={`flex-1 flex flex-col min-w-0 transition-[margin] duration-300 ease-out ${isSidebarCollapsed ? 'ml-16' : 'lg:ml-64'} ml-0`}>
-        <HeaderBar
+        {location.pathname !== "/monitor-ciudad" && <HeaderBar
           scenario={scenario}
           onScenarioChange={setScenario}
           growthRate={growthRate}
@@ -50,7 +50,7 @@ const DashboardLayout = () => {
           onExport={handleExport}
           exportLoading={exportLoading}
           showFullControls={showFullControls}
-        />
+        />}
         <main className="flex-1 overflow-auto bg-gradient-to-br from-gray-50 via-white to-gray-50">
           <Outlet context={{ 
             scenario, 

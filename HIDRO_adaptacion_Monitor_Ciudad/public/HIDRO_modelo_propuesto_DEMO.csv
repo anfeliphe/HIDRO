@@ -1,0 +1,19 @@
+id_predio_demo,id_usuario,fecha_censo,plano,zona,barrio,manzana,municipio,direccion,clase_uso,tipo_actividad,tipo_punto,unidades_habitacionales,unidades_no_habitacionales,total_unidades,numero_familias,numero_habitantes,tiene_agua,horas_servicio,tanque_reserva,disponibilidad_cajilla,clasificacion,tiene_medidor,lat,lng,dato_simulado
+DEMO-P-001,DEMO-E-001,2026-11-15,DEMO-PLANO,Zona 5,Sector demo A,DEMO-M1,Soacha,Direccion ficticia 1,Residencial,,1,1,0,1,1,4,Sí,4,Sí,Sí,Habitado,No,4.575,-74.215,Sí
+DEMO-P-002,DEMO-E-002,2026-11-15,DEMO-PLANO,Zona 5,Sector demo A,DEMO-M1,Soacha,Direccion ficticia 2,Residencial,,1,1,0,1,1,5,Sí,6,No,Sí,Habitado,No,4.575,-74.2135,Sí
+DEMO-P-003,DEMO-E-003,2026-11-15,DEMO-PLANO,Zona 5,Sector demo A,DEMO-M1,Soacha,Direccion ficticia 3,Residencial,,1,1,0,1,2,6,Sí,8,Sí,Sí,Habitado,No,4.575,-74.212,Sí
+DEMO-P-004,DEMO-E-004,2026-11-15,DEMO-PLANO,Zona 5,Sector demo A,DEMO-M2,Soacha,Direccion ficticia 4,Residencial,,1,1,0,1,1,7,Sí,12,No,Sí,Habitado,No,4.575,-74.2105,Sí
+DEMO-P-005,DEMO-E-005,2026-11-15,DEMO-PLANO,Zona 5,Sector demo A,DEMO-M2,Soacha,Direccion ficticia 5,Residencial,,1,1,0,1,1,3,No,,Sí,Sí,Habitado,No,4.575,-74.209,Sí
+DEMO-P-006,DEMO-E-006,2026-11-15,DEMO-PLANO,Zona 5,Sector demo A,DEMO-M2,Soacha,Direccion ficticia 6,Residencial,,1,1,0,1,2,4,Sí,2,No,Sí,Habitado,No,4.575,-74.2075,Sí
+DEMO-P-007,DEMO-E-007,2026-11-15,DEMO-PLANO,Zona 5,Sector demo B,DEMO-M3,Soacha,Direccion ficticia 7,Residencial,,1,1,0,1,1,5,Sí,4,Sí,Sí,Habitado,No,4.5765,-74.215,Sí
+DEMO-P-008,DEMO-E-008,2026-11-15,DEMO-PLANO,Zona 5,Sector demo B,DEMO-M3,Soacha,Direccion ficticia 8,Residencial,,1,1,0,1,1,6,Sí,6,No,Sí,Habitado,No,4.5765,-74.2135,Sí
+DEMO-P-009,DEMO-E-009,2026-11-15,DEMO-PLANO,Zona 5,Sector demo B,DEMO-M3,Soacha,Direccion ficticia 9,Residencial,,1,1,0,1,2,7,Sí,8,Sí,Sí,Habitado,No,4.5765,-74.212,Sí
+DEMO-P-010,DEMO-E-010,2026-11-15,DEMO-PLANO,Zona 5,Sector demo B,DEMO-M4,Soacha,Direccion ficticia 10,Residencial,,1,1,0,1,1,3,No,,No,Sí,Habitado,No,4.5765,-74.2105,Sí
+DEMO-P-011,DEMO-E-011,2026-11-15,DEMO-PLANO,Zona 5,Sector demo B,DEMO-M4,Soacha,Direccion ficticia 11,Residencial,,1,1,0,1,1,4,Sí,24,Sí,Sí,Habitado,No,4.5765,-74.209,Sí
+DEMO-P-012,DEMO-E-012,2026-11-15,DEMO-PLANO,Zona 5,Sector demo B,DEMO-M4,Soacha,Direccion ficticia 12,Residencial,,1,1,0,1,2,5,Sí,2,No,Sí,Habitado,No,4.5765,-74.2075,Sí
+DEMO-P-013,DEMO-E-013,2026-11-15,DEMO-PLANO,Zona 5,Sector demo C,DEMO-M5,Soacha,Direccion ficticia 13,Comercial,Tienda,1,0,1,1,,,Sí,4,Sí,Sí,Habitado,No,4.578,-74.215,Sí
+DEMO-P-014,DEMO-E-014,2026-11-15,DEMO-PLANO,Zona 5,Sector demo C,DEMO-M5,Soacha,Direccion ficticia 14,Industrial,Industrial,1,0,1,1,,,Sí,6,No,Sí,Habitado,No,4.578,-74.2135,Sí
+DEMO-P-015,DEMO-E-015,2026-11-15,DEMO-PLANO,Zona 5,Sector demo C,DEMO-M5,Soacha,Direccion ficticia 15,Oficial,Oficial,1,0,1,1,,,No,,Sí,Sí,Habitado,No,4.578,-74.212,Sí
+DEMO-P-016,DEMO-E-016,2026-11-15,DEMO-PLANO,Zona 5,Sector demo C,DEMO-M6,Soacha,Direccion ficticia 16,Multiusuario,Otros,2,3,0,3,,,Sí,12,No,Sí,Habitado,No,4.578,-74.2105,Sí
+DEMO-P-017,DEMO-E-017,2026-11-15,DEMO-PLANO,Zona 5,Sector demo C,DEMO-M6,Soacha,Direccion ficticia 17,Comercial,Tienda,1,0,1,1,,,Sí,24,Sí,Sí,Habitado,No,4.578,-74.209,Sí
+DEMO-P-018,DEMO-E-018,2026-11-15,DEMO-PLANO,Zona 5,Sector demo C,DEMO-M6,Soacha,Direccion ficticia 18,Multiusuario,Otros,2,3,0,3,,,Sí,2,No,Sí,Habitado,No,4.578,-74.2075,Sí

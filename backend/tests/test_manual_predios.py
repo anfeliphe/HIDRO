@@ -38,6 +38,19 @@ class ManualPrediosTest(unittest.TestCase):
         duplicate=client.post('/parcels',json=body)
         self.assertEqual(duplicate.status_code,400)
         self.assertEqual(duplicate.json()['detail'],'Ya existe un predio con ese identificador')
+        self.assertEqual(client.delete('/parcels/PRUEBA-1').status_code,200)
+        self.assertEqual(client.get('/census/unified').json(),[])
+        self.assertEqual(client.delete('/parcels/PRUEBA-1').status_code,404)
+        from pathlib import Path
+        csv=(Path(__file__).parents[2]/'public/HIDRO_modelo_propuesto_DEMO.csv').read_text()
+        self.assertEqual(client.post('/census/import',json={'content':csv,'preview':False}).status_code,200)
+        app.dependency_overrides[get_current_user_id]=lambda:2
+        self.assertEqual(client.delete('/census/records/DEMO-P-001').status_code,404)
+        app.dependency_overrides[get_current_user_id]=lambda:1
+        self.assertEqual(len(client.get('/census/unified').json()),18)
+        self.assertEqual(client.delete('/census/records/DEMO-P-001').status_code,200)
+        self.assertEqual(len(client.get('/census/unified').json()),17)
+        self.assertEqual(client.delete('/census/records/DEMO-P-001').status_code,404)
         asyncio.run(engine.dispose())
 
     def test_forecast_understands_spanish(self):

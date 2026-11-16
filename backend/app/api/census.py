@@ -92,3 +92,16 @@ async def import_census(body:ImportBody, db:AsyncSession=Depends(get_db), uid:in
             else: db.add(CensusRecord(owner_id=uid,external_id=key,payload=r))
         await db.commit()
     return {'total':len(rows),'inserted':len(rows)-updated,'updated':updated,'simulated':sum(r['dato_simulado'] for r in rows),'preview':body.preview}
+
+
+@router.delete('/records/{external_id}')
+async def delete_census_record(external_id: str, db: AsyncSession = Depends(get_db),
+                               user_id: int = Depends(get_current_user_id)):
+    record = (await db.execute(select(CensusRecord).where(
+        CensusRecord.owner_id == user_id, CensusRecord.external_id == external_id
+    ))).scalar_one_or_none()
+    if record is None:
+        raise HTTPException(status_code=404, detail='No se encontró el predio importado')
+    await db.delete(record)
+    await db.commit()
+    return {'message': 'Registro importado eliminado.'}

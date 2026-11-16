@@ -186,3 +186,14 @@ async def upload_parcels(
         "message": f"Se importaron {inserted + updated} predios ({inserted} nuevos y {updated} actualizados)."
         + (f" {len(errors)} row(s) had errors." if errors else ""),
     }
+
+
+@router.delete("/{parcel_id}")
+async def delete_parcel(parcel_id: str, db: AsyncSession = Depends(get_db),
+                        _user_id: int = Depends(get_current_user_id)):
+    parcel = (await db.execute(select(Parcel).where(Parcel.parcel_id == parcel_id))).scalar_one_or_none()
+    if parcel is None:
+        raise HTTPException(status_code=404, detail="No se encontró el predio")
+    await db.delete(parcel)
+    await db.commit()
+    return {"message": "Predio eliminado."}

@@ -30,3 +30,10 @@
 .census .btn-primary{background:linear-gradient(135deg,#3979ff,#5147ef);color:white;border:0;}
 @media(max-width:640px){.census{padding:74px 14px 20px}.census-hero{padding:20px;flex-direction:row;flex-wrap:wrap;gap:14px}.census-hero>div{flex-basis:calc(100% - 64px)}.census h1{font-size:20px}.census-tag{margin-left:62px}.census-stats strong{font-size:24px}.census-import{padding:18px}}
 @media print{.census-hero{background:white!important;box-shadow:none}.census-panel,.census-stats article{box-shadow:none}}
+
+/* La vista Mapa dedica todo el espacio al territorio. */
+.hidro-view-map .census-map-grid{grid-template-columns:minmax(0,1fr);margin:20px 0 0;}
+.hidro-view-map .census-map{height:calc(100dvh - 260px);min-height:450px;}
+.census td button.hidro-delete{color:#b42336;border-color:#f1cbd0;}
+.census td button.hidro-delete:hover:not(:disabled){background:#fff1f3;border-color:#e8a6af;}
+@media(max-width:640px){.hidro-view-map .census-map{height:65dvh;min-height:360px;}}

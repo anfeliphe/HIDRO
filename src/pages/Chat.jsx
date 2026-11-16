@@ -4,7 +4,7 @@ import { Plus, Send, Sparkles } from 'lucide-react';
 import * as api from '../api/client';
 import { ChatMarkdown } from '../components/ChatMarkdown';
 
-const CHAT_STORAGE_VERSION = 'v1';
+const CHAT_STORAGE_VERSION = 'v2-integrated';
 const CHAT_MAX_STORED = 100;
 
 function chatStorageKey() {
@@ -54,16 +54,8 @@ const suggestedQuestions = [
 ];
 
 async function loadAllParcelsForChat() {
-  const acc = [];
-  let skip = 0;
-  const limit = 500;
-  for (;;) {
-    const res = await api.getParcels('All', skip, limit);
-    acc.push(...res.parcels);
-    if (res.parcels.length < limit || acc.length >= res.total) break;
-    skip += limit;
-  }
-  return acc;
+ const rows=await api.apiFetch('/census/unified');
+ return rows.filter(r=>r.demanda_diaria_90_m3!=null).map(r=>({parcel_id:r.id_predio_demo,population:r.numero_habitantes,yearly90:r.demanda_diaria_90_m3*1000*365,yearly100:r.demanda_diaria_100_m3*1000*365}));
 }
 
 async function getAnswerForQuestion(question, growthRate = 2, years = 5) {
@@ -238,8 +230,8 @@ const Chat = () => {
               <Sparkles className="h-4 w-4 text-white" strokeWidth={2} />
             </div>
             <div>
-              <h2 className="text-lg font-semibold tracking-tight text-gray-900">Water Demand Assistant</h2>
-              <p className="text-xs text-gray-500">Answers use the same parcel data as your dashboard</p>
+              <h2 className="text-lg font-semibold tracking-tight text-gray-900">Asistente HIDRO</h2>
+              <p className="text-xs text-gray-500">Datos integrados de HIDRO. El chat no aplica los filtros visuales; la demanda cubre solo predios aptos.</p>
             </div>
           </div>
           <button

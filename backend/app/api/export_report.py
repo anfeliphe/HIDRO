@@ -1,3 +1,4 @@
+from app.services.hidro_data import demand_parcels, unified_records
 """
 PDF export: multi-page water demand report with charts, map snippets, and structured AI analysis.
 """
@@ -64,12 +65,9 @@ async def _gather_report_payload(
     growth_rate: float,
     years: int,
     land_use: str | None,
+    uid: int,
 ) -> dict:
-    q = select(Parcel)
-    if land_use and land_use in ("Residential", "Commercial", "Mixed-use"):
-        q = q.where(Parcel.land_use == land_use)
-    r = await db.execute(q)
-    parcels = list(r.scalars().all())
+    parcels = await demand_parcels(db, uid, land_use)
 
     l_per = L_PER_CAPITA_100 if scenario == 100 else L_PER_CAPITA_90
     total_daily = sum(parcel_daily_consumption(p.population, l_per, p.land_use) for p in parcels)
@@ -267,8 +265,13 @@ async def export_pdf_report(
         raise HTTPException(status_code=400, detail="scenario must be 90 or 100")
 
     try:
-        payload = await _gather_report_payload(db, scenario, growth_rate, years, land_use)
+        payload = await _gather_report_payload(db, scenario, growth_rate, years, land_use, _user_id)
         ai_sections = await _ai_structured_analysis(payload)
+        records = await unified_records(db, _user_id)
+        eligible = len(await demand_parcels(db, _user_id))
+        scope = f"HIDRO integrated dataset: {len(records)} records; {eligible} eligible for demand estimates; {sum(r['dato_simulado'] is True for r in records)} marked simulated. Missing populations and unsupported land uses are excluded from demand. This PDF covers eligible records and does not apply the screen's sector/source filters. "
+        ai_sections['limitations'] = scope + ai_sections.get('limitations', '')
+        ai_sections['executive'] = scope + ai_sections.get('executive', '')
         pdf_bytes = build_water_demand_report_pdf(payload, ai_sections)
     except Exception as e:
         logger.exception("PDF export failed")

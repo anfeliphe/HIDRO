@@ -1,3 +1,4 @@
+from app.services.hidro_data import demand_parcels
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
@@ -32,11 +33,7 @@ async def get_summary(
     _user_id: int = Depends(get_current_user_id),
 ):
     """Total neighborhood demand: daily, monthly, yearly, population. scenario=90 or 100 (L/capita). Optional land_use filter (Residential, Commercial, Mixed-use)."""
-    q = select(Parcel)
-    if land_use and land_use in ("Residential", "Commercial", "Mixed-use"):
-        q = q.where(Parcel.land_use == land_use)
-    r = await db.execute(q)
-    parcels = list(r.scalars().all())
+    parcels = await demand_parcels(db, _user_id, land_use)
     l_per_capita = L_PER_CAPITA_100 if scenario == 100 else L_PER_CAPITA_90
     total_daily = sum(parcel_daily_consumption(p.population, l_per_capita, p.land_use) for p in parcels)
     total_pop = sum(p.population for p in parcels)
@@ -55,11 +52,7 @@ async def get_land_use_breakdown(
     _user_id: int = Depends(get_current_user_id),
 ):
     """Land-use category comparison (count, consumption, percentage). Uses 90 L/c. Optional land_use filter."""
-    q = select(Parcel)
-    if land_use and land_use in ("Residential", "Commercial", "Mixed-use"):
-        q = q.where(Parcel.land_use == land_use)
-    r = await db.execute(q)
-    parcels = list(r.scalars().all())
+    parcels = await demand_parcels(db, _user_id, land_use)
     breakdown = {"Residential": {"count": 0, "consumption": 0}, "Commercial": {"count": 0, "consumption": 0}, "Mixed-use": {"count": 0, "consumption": 0}}
     for p in parcels:
         breakdown[p.land_use]["count"] += 1
@@ -87,11 +80,7 @@ async def get_forecast(
 ):
     """Demand projection. growth_rate in %, years 1-20. Optional land_use filter."""
     years = max(1, min(20, years))
-    q = select(Parcel)
-    if land_use and land_use in ("Residential", "Commercial", "Mixed-use"):
-        q = q.where(Parcel.land_use == land_use)
-    r = await db.execute(q)
-    parcels = list(r.scalars().all())
+    parcels = await demand_parcels(db, _user_id, land_use)
     base90 = sum(parcel_yearly_consumption(p.population, L_PER_CAPITA_90, p.land_use) for p in parcels)
     base100 = sum(parcel_yearly_consumption(p.population, L_PER_CAPITA_100, p.land_use) for p in parcels)
     data = project_demand(base90, base100, growth_rate, years)
@@ -104,8 +93,7 @@ async def get_scenario_comparison(
     _user_id: int = Depends(get_current_user_id),
 ):
     """Scenario comparison: 0.09 m³/c vs 0.1 m³/c yearly demand (liters)."""
-    r = await db.execute(select(Parcel))
-    parcels = list(r.scalars().all())
+    parcels = await demand_parcels(db, _user_id)
     y90 = sum(parcel_yearly_consumption(p.population, L_PER_CAPITA_90, p.land_use) for p in parcels)
     y100 = sum(parcel_yearly_consumption(p.population, L_PER_CAPITA_100, p.land_use) for p in parcels)
     return ScenarioComparison(

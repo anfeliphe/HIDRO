@@ -18,16 +18,15 @@ const SidebarNavigation = ({ isCollapsed, onToggle }) => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   
   const navItems = [
-    { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
-    { path: '/map', icon: MapPin, label: 'Map View' },
-    { path: '/analytics', icon: BarChart3, label: 'Analytics' },
+    { path: '/', icon: LayoutDashboard, label: 'Inicio' },
+    { path: '/map', icon: MapPin, label: 'Mapa' },
+    { path: '/analytics', icon: BarChart3, label: 'Análisis' },
     { path: '/chat', icon: MessageSquare, label: 'Chat' },
   ];
   
   const dataItems = [
-    { path: '/monitor-ciudad', icon: Database, label: 'Monitor Ciudad' },
-    { path: '/parcels', icon: Building2, label: 'Parcels' },
-    { path: '/data-sources', icon: Database, label: 'Data Sources' },
+    { path: '/parcels', icon: Building2, label: 'Predios' },
+    { path: '/data-sources', icon: Database, label: 'Fuentes de datos' },
   ];
   
   const isActive = (path) => {
@@ -107,7 +106,7 @@ const SidebarNavigation = ({ isCollapsed, onToggle }) => {
             )}
             {(!isCollapsed || isMobileOpen) && (
               <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                NAVIGATION
+                HIDRO
               </h2>
             )}
           </div>
@@ -121,7 +120,7 @@ const SidebarNavigation = ({ isCollapsed, onToggle }) => {
           {(!isCollapsed || isMobileOpen) && (
             <div className="mt-4 sm:mt-6 px-3 mb-2 opacity-0 animate-fade-in" style={{ animationDelay: '0.16s', animationFillMode: 'forwards' }}>
               <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                DATA
+                DATOS
               </h3>
             </div>
           )}

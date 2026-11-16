@@ -40,7 +40,7 @@ const DashboardLayout = () => {
         onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
       />
       <div className={`flex-1 flex flex-col min-w-0 transition-[margin] duration-300 ease-out ${isSidebarCollapsed ? 'ml-16' : 'lg:ml-64'} ml-0`}>
-        {location.pathname !== "/monitor-ciudad" && <HeaderBar
+        {!["/", "/map", "/analytics", "/parcels", "/data-sources"].includes(location.pathname) && <HeaderBar
           scenario={scenario}
           onScenarioChange={setScenario}
           growthRate={growthRate}

@@ -69,6 +69,11 @@ class ImportBody(BaseModel):
     content: constr(max_length=2_000_000)
     preview: bool = True
 
+@router.get('/unified')
+async def unified_census(db:AsyncSession=Depends(get_db), uid:int=Depends(get_current_user_id)):
+    from app.services.hidro_data import unified_records
+    return await unified_records(db,uid)
+
 @router.get('')
 async def list_census(db:AsyncSession=Depends(get_db), uid:int=Depends(get_current_user_id)):
     result=await db.execute(select(CensusRecord).where(CensusRecord.owner_id==uid).order_by(CensusRecord.external_id))

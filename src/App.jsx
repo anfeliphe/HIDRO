@@ -42,15 +42,15 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         >
-          <Route index element={<Dashboard />} />
-          <Route path="monitor-ciudad" element={<Census />} />
-          <Route path="map" element={<MapView />} />
-          <Route path="analytics" element={<Analytics />} />
+          <Route index element={<Census />} />
+          <Route path="monitor-ciudad" element={<Navigate to="/" replace />} />
+          <Route path="map" element={<Census />} />
+          <Route path="analytics" element={<Census />} />
           <Route path="chat" element={<Chat />} />
-          <Route path="parcels" element={<Parcels />} />
+          <Route path="parcels" element={<Census />} />
           <Route path="settings" element={<Settings />} />
           <Route path="profile" element={<Profile />} />
-          <Route path="data-sources" element={<DataSources />} />
+          <Route path="data-sources" element={<Census />} />
         </Route>
         
         {/* Redirect unknown routes */}

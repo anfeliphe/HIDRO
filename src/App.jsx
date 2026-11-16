@@ -43,7 +43,6 @@ function AppRoutes() {
           }
         >
           <Route index element={<Census />} />
-          <Route path="monitor-ciudad" element={<Navigate to="/" replace />} />
           <Route path="map" element={<Census />} />
           <Route path="analytics" element={<Census />} />
           <Route path="chat" element={<Chat />} />

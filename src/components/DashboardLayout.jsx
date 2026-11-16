@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import SidebarNavigation from './SidebarNavigation';
 import HeaderBar from './HeaderBar';
@@ -6,6 +6,17 @@ import { downloadPdfReport } from '../api/client';
 
 const DashboardLayout = () => {
   const location = useLocation();
+  const contentRef = useRef(null);
+  useEffect(() => {
+    const node = contentRef.current;
+    if (!node || !node.animate || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    // Animate navigation without remounting pages or resetting their filters.
+    const animation = node.animate(
+      [{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'translateY(0)' }],
+      { duration: 300, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' },
+    );
+    return () => animation.cancel();
+  }, [location.pathname]);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [scenario, setScenario] = useState(90);
   const [growthRate, setGrowthRate] = useState(2);
@@ -51,7 +62,7 @@ const DashboardLayout = () => {
           exportLoading={exportLoading}
           showFullControls={showFullControls}
         />}
-        <main className="flex-1 overflow-auto bg-gradient-to-br from-gray-50 via-white to-gray-50">
+        <main ref={contentRef} className="flex-1 overflow-auto bg-gradient-to-br from-gray-50 via-white to-gray-50">
           <Outlet context={{ 
             scenario, 
             growthRate, 

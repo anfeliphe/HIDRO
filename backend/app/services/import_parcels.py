@@ -14,7 +14,7 @@ VALID_LAND_USE = {"Residential", "Commercial", "Mixed-use"}
 def _normalize_land_use(s: str) -> str:
     v = (s or "").strip()
     if not v:
-        raise ValueError("land_use is required")
+        raise ValueError("El uso del predio (land_use) es obligatorio")
     # Allow common variants
     lower = v.lower()
     if lower in ("residential", "res"):
@@ -25,7 +25,7 @@ def _normalize_land_use(s: str) -> str:
         return "Mixed-use"
     if v in VALID_LAND_USE:
         return v
-    raise ValueError(f"land_use must be one of Residential, Commercial, Mixed-use; got {v!r}")
+    raise ValueError(f"El uso debe ser residencial (Residential), comercial (Commercial) o mixto (Mixed-use); se recibió {v!r}")
 
 
 def _population_from_row(row: dict[str, Any]) -> Any:
@@ -61,7 +61,7 @@ def _row_to_parcel(row: dict[str, Any]) -> dict[str, Any]:
     """Convert a row dict to normalized parcel dict."""
     pid = str(row.get("parcel_id") or row.get("id") or "").strip()
     if not pid:
-        raise ValueError("parcel_id is required")
+        raise ValueError("El identificador del predio (parcel_id) es obligatorio")
     land_use = _normalize_land_use(str(row.get("land_use") or row.get("landUse") or ""))
     pop = _population_from_row(row)
     if pop is None:
@@ -71,18 +71,18 @@ def _row_to_parcel(row: dict[str, Any]) -> dict[str, Any]:
     try:
         population = int(float(pop)) if pop is not None else 0
     except (TypeError, ValueError):
-        raise ValueError(f"population must be a number; got {pop!r}")
+        raise ValueError(f"El número de habitantes debe ser numérico; se recibió {pop!r}")
     if population < 0 or population > 10000:
-        raise ValueError(f"population must be 0–10000; got {population}")
+        raise ValueError(f"Los habitantes deben estar entre 0 y 10000; se recibió {population}")
     try:
         lat = float(row.get("lat") or row.get("latitude") or 0)
         lng = float(row.get("lng") or row.get("lon") or row.get("longitude") or 0)
     except (TypeError, ValueError):
-        raise ValueError(f"lat/lng must be numbers; got lat={row.get('lat')}, lng={row.get('lng')}")
+        raise ValueError(f"La latitud y longitud deben ser numéricas; se recibió lat={row.get('lat')}, lng={row.get('lng')}")
     if not (-90 <= lat <= 90):
-        raise ValueError(f"lat must be -90 to 90; got {lat}")
+        raise ValueError(f"La latitud debe estar entre −90 y 90; se recibió {lat}")
     if not (-180 <= lng <= 180):
-        raise ValueError(f"lng must be -180 to 180; got {lng}")
+        raise ValueError(f"La longitud debe estar entre −180 y 180; se recibió {lng}")
     return {
         "parcel_id": pid[:32],
         "land_use": land_use,
@@ -160,5 +160,5 @@ def parse_json(content: str) -> list[dict[str, Any]]:
                 props["lat"] = geom["coordinates"][1]
             parcels.append(_row_to_parcel(props))
     else:
-        raise ValueError("JSON must be an array of parcel objects or a GeoJSON FeatureCollection")
+        raise ValueError("El JSON debe contener una lista de predios o una colección GeoJSON (FeatureCollection)")
     return parcels

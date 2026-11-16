@@ -18,25 +18,25 @@ const MapView = () => {
           onChange={(e) => setSelectedLandUse(e.target.value)}
           className="input-field text-xs sm:text-sm"
         >
-          <option value="All">All Types</option>
-          <option value="Residential">Residential</option>
-          <option value="Commercial">Commercial</option>
-          <option value="Mixed-use">Mixed-use</option>
+          <option value="All">Todos los usos</option>
+          <option value="Residential">Residencial</option>
+          <option value="Commercial">Comercial</option>
+          <option value="Mixed-use">Mixto</option>
         </select>
         <select
           value={scenario}
           onChange={(e) => setScenario(Number(e.target.value))}
           className="input-field text-xs sm:text-sm"
         >
-          <option value={90}>Baseline (0.09 m³/c)</option>
-          <option value={100}>High estimate (0.1 m³/c)</option>
+          <option value={90}>Base (0,09 m³/persona)</option>
+          <option value={100}>Alta (0,1 m³/persona)</option>
         </select>
       </div>
       
       {/* Full Map */}
       <div className="flex-1 relative min-h-[300px]">
         {loading && parcels.length === 0 ? (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-100/50 rounded-xl"><span className="text-gray-600">Loading map…</span></div>
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-100/50 rounded-xl"><span className="text-gray-600">Cargando mapa…</span></div>
         ) : (
           <MapPanel
             parcels={parcels}

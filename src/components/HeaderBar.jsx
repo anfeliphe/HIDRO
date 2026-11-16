@@ -2,20 +2,20 @@ import { Droplet, Download, LogOut, ChevronRight, Loader2 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const PAGE_TITLES = {
-  '/': 'Dashboard',
-  '/map': 'Map View',
-  '/analytics': 'Analytics',
+  '/': "Inicio",
+  '/map': "Mapa",
+  '/analytics': "Análisis",
   '/chat': 'Chat',
-  '/parcels': 'Parcels',
-  '/settings': 'Settings',
-  '/profile': 'Profile',
-  '/data-sources': 'Data Sources',
+  '/parcels': "Predios",
+  '/settings': "Configuración",
+  '/profile': "Perfil",
+  '/data-sources': "Fuentes de datos",
 };
 
 const HeaderBar = ({ scenario, onScenarioChange, growthRate, onGrowthChange, projectionYears, onProjectionChange, onExport, exportLoading = false, showFullControls = true }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const pageTitle = PAGE_TITLES[location.pathname] || 'Dashboard';
+  const pageTitle = PAGE_TITLES[location.pathname] || "Inicio";
 
   const handleLogout = () => {
     localStorage.removeItem('authToken');
@@ -35,11 +35,11 @@ const HeaderBar = ({ scenario, onScenarioChange, growthRate, onGrowthChange, pro
         <div className="min-w-0">
           {showFullControls ? (
             <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent truncate">
-              Demand Dashboard
+              HIDRO
             </h1>
           ) : (
             <div className="flex items-center gap-2 text-gray-600">
-              <span className="text-sm font-medium truncate">Demand Dashboard</span>
+              <span className="text-sm font-medium truncate">HIDRO</span>
               <ChevronRight size={16} className="text-gray-400 shrink-0" />
               <span className="text-sm font-semibold text-gray-900 truncate">{pageTitle}</span>
             </div>
@@ -51,7 +51,7 @@ const HeaderBar = ({ scenario, onScenarioChange, growthRate, onGrowthChange, pro
         {showFullControls && (
           <>
           <div className="flex items-center gap-2 bg-gray-50 rounded-lg p-1">
-            <span className="text-xs sm:text-sm text-gray-600 hidden sm:inline px-2">Scenario:</span>
+            <span className="text-xs sm:text-sm text-gray-600 hidden sm:inline px-2">Escenario:</span>
             <button
               onClick={() => onScenarioChange(90)}
               className={`px-3 sm:px-4 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 ${
@@ -75,7 +75,7 @@ const HeaderBar = ({ scenario, onScenarioChange, growthRate, onGrowthChange, pro
           </div>
           
           <div className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-1.5">
-            <span className="text-xs sm:text-sm text-gray-600 hidden sm:inline">Growth:</span>
+            <span className="text-xs sm:text-sm text-gray-600 hidden sm:inline">Crecimiento:</span>
             <input
               type="number"
               value={growthRate}
@@ -101,7 +101,7 @@ const HeaderBar = ({ scenario, onScenarioChange, growthRate, onGrowthChange, pro
             className="px-3 py-1.5 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 bg-white hover:bg-gray-50 transition-colors"
           >
             {[1, 2, 3, 4, 5, 7, 10].map(years => (
-              <option key={years} value={years}>{years} Year{years > 1 ? 's' : ''}</option>
+              <option key={years} value={years}>{years} Año{years > 1 ? 's' : ''}</option>
             ))}
           </select>
           
@@ -117,17 +117,17 @@ const HeaderBar = ({ scenario, onScenarioChange, growthRate, onGrowthChange, pro
               ) : (
                 <Download size={14} className="shrink-0" />
               )}
-              <span>{exportLoading ? 'Generating…' : 'Export'}</span>
+              <span>{exportLoading ? "Generando…" : "Exportar"}</span>
             </button>
           </>
         )}
         <button
           onClick={handleLogout}
           className="btn-secondary flex items-center gap-2 text-xs sm:text-sm ml-auto sm:ml-0"
-          title="Logout"
+          title="Cerrar sesión"
         >
           <LogOut size={14} />
-          <span className="hidden sm:inline">Logout</span>
+          <span className="hidden sm:inline">Cerrar sesión</span>
         </button>
       </div>
     </header>

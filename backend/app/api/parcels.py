@@ -61,7 +61,7 @@ async def create_parcel(
     """Create a single parcel manually. parcel_id must be unique."""
     r = await db.execute(select(Parcel).where(Parcel.parcel_id == data.parcel_id))
     if r.scalar_one_or_none():
-        raise HTTPException(status_code=400, detail="Parcel ID already exists")
+        raise HTTPException(status_code=400, detail="Ya existe un predio con ese identificador")
     p = Parcel(
         parcel_id=data.parcel_id.strip(),
         land_use=data.land_use,
@@ -84,7 +84,7 @@ async def get_parcel(
     r = await db.execute(select(Parcel).where(Parcel.parcel_id == parcel_id))
     p = r.scalar_one_or_none()
     if not p:
-        raise HTTPException(status_code=404, detail="Parcel not found")
+        raise HTTPException(status_code=404, detail="No se encontró el predio")
     return _parcel_to_response(p)
 
 
@@ -98,7 +98,7 @@ async def update_parcel(
     r = await db.execute(select(Parcel).where(Parcel.parcel_id == parcel_id))
     p = r.scalar_one_or_none()
     if not p:
-        raise HTTPException(status_code=404, detail="Parcel not found")
+        raise HTTPException(status_code=404, detail="No se encontró el predio")
     if data.land_use is not None:
         p.land_use = data.land_use
     if data.population is not None:
@@ -125,7 +125,7 @@ async def upload_parcels(
     replace_all: if True, delete existing parcels then import; else upsert by parcel_id.
     """
     if not file.filename:
-        raise HTTPException(status_code=400, detail="No file provided")
+        raise HTTPException(status_code=400, detail="No se recibió un archivo")
     content = (await file.read()).decode("utf-8", errors="replace")
     filename_lower = file.filename.lower()
 
@@ -135,14 +135,14 @@ async def upload_parcels(
         elif filename_lower.endswith(".json") or filename_lower.endswith(".geojson"):
             rows = parse_json(content)
         else:
-            raise HTTPException(status_code=400, detail="File must be .csv, .json, or .geojson")
+            raise HTTPException(status_code=400, detail="El archivo debe ser CSV, JSON o GeoJSON")
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except json.JSONDecodeError as e:
-        raise HTTPException(status_code=400, detail=f"Invalid JSON: {e}")
+        raise HTTPException(status_code=400, detail=f"JSON no válido: {e}")
 
     if not rows:
-        raise HTTPException(status_code=400, detail="No valid parcel records in file")
+        raise HTTPException(status_code=400, detail="El archivo no contiene predios válidos")
 
     if replace_all:
         await db.execute(Parcel.__table__.delete())
@@ -173,7 +173,7 @@ async def upload_parcels(
                 )
                 inserted += 1
         except Exception as e:
-            errors.append(f"Row {i + 1} ({row.get('parcel_id', '?')}): {e}")
+            errors.append(f"Fila {i + 1} ({row.get('parcel_id', '?')}): {e}")
 
     await db.commit()
 
@@ -183,6 +183,6 @@ async def upload_parcels(
         "updated": updated,
         "total": inserted + updated,
         "errors": errors[:20],
-        "message": f"Imported {inserted + updated} parcels ({inserted} new, {updated} updated)."
+        "message": f"Se importaron {inserted + updated} predios ({inserted} nuevos y {updated} actualizados)."
         + (f" {len(errors)} row(s) had errors." if errors else ""),
     }

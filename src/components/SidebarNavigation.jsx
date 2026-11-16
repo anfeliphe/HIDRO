@@ -68,7 +68,7 @@ const SidebarNavigation = ({ isCollapsed, onToggle }) => {
         <button
           onClick={() => setIsMobileOpen(!isMobileOpen)}
           className="lg:hidden fixed top-4 left-4 z-[60] p-2 bg-slate-800 text-white rounded-lg shadow-lg hover:bg-slate-700 transition-colors"
-          aria-label="Toggle menu"
+          aria-label="Abrir o cerrar menú"
         >
           <Menu size={24} />
         </button>
@@ -99,7 +99,7 @@ const SidebarNavigation = ({ isCollapsed, onToggle }) => {
               <button
                 onClick={() => setIsMobileOpen(false)}
                 className="lg:hidden p-1.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors"
-                aria-label="Close menu"
+                aria-label="Cerrar menú"
               >
                 <X size={20} />
               </button>
@@ -142,7 +142,7 @@ const SidebarNavigation = ({ isCollapsed, onToggle }) => {
           >
             <User size={20} className="shrink-0" />
             {(!isCollapsed || isMobileOpen) && (
-              <span className="text-sm font-medium">Profile</span>
+              <span className="text-sm font-medium">Perfil</span>
             )}
           </Link>
           <Link
@@ -156,7 +156,7 @@ const SidebarNavigation = ({ isCollapsed, onToggle }) => {
           >
             <Settings size={20} className="shrink-0" />
             {(!isCollapsed || isMobileOpen) && (
-              <span className="text-sm font-medium">Settings</span>
+              <span className="text-sm font-medium">Configuración</span>
             )}
           </Link>
         </div>

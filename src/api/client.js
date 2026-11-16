@@ -1,3 +1,12 @@
+function errorEnEspanol(message,status){
+ const text=String(message||'');
+ if(status===401)return 'Correo o contraseña incorrectos, o sesión vencida. Inicia sesión de nuevo.';
+ if(status===422)return 'Revisa los campos: faltan datos obligatorios o alguno no tiene el formato permitido.';
+ if(status>=500)return 'No se pudo completar la solicitud. Intenta de nuevo en unos momentos.';
+ const known={'Failed to fetch':'No se pudo conectar con HIDRO. Revisa tu conexión.','Parcel ID already exists':'Ya existe un predio con ese identificador','Parcel not found':'No se encontró el predio','Email already registered':'El correo electrónico ya está registrado','Not Found':'No se encontró el recurso solicitado','Forbidden':'No tienes permiso para esta operación','Bad Request':'Revisa los datos enviados'};
+ return known[text]||text||'No se pudo completar la solicitud.';
+}
+async function fetchSeguro(...args){try{return await fetch(...args);}catch{throw new Error('No se pudo conectar con HIDRO. Revisa tu conexión e intenta de nuevo.');}}
 /**
  * API client for Water Demand backend.
  * All consumption values from API are in liters; convert to m³ for display (÷ 1000).
@@ -21,7 +30,7 @@ export async function apiFetch(path, options = {}) {
   const pathNorm = path.startsWith("/") ? path : `/${path}`;
   const url = `${base}${pathNorm}`;
   const useAuth = options.skipAuth !== true;
-  const res = await fetch(url, {
+  const res = await fetchSeguro(url, {
     ...options,
     headers: { ...headers(useAuth), ...options?.headers },
   });
@@ -35,7 +44,7 @@ export async function apiFetch(path, options = {}) {
     const msg = Array.isArray(err.detail)
       ? err.detail.map((e) => e.msg || JSON.stringify(e)).join(". ")
       : err.detail || res.statusText;
-    throw new Error(typeof msg === "string" ? msg : JSON.stringify(msg));
+    throw new Error(errorEnEspanol(typeof msg === "string" ? msg : JSON.stringify(msg),res.status));
   }
   return res.json();
 }
@@ -110,7 +119,7 @@ export async function uploadParcelDataset(file, replaceAll = false) {
   const token = getToken();
   const headers = {};
   if (token) headers.Authorization = `Bearer ${token}`;
-  const res = await fetch(url, {
+  const res = await fetchSeguro(url, {
     method: "POST",
     headers,
     body: form,
@@ -123,7 +132,7 @@ export async function uploadParcelDataset(file, replaceAll = false) {
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: res.statusText }));
     const msg = err.detail || res.statusText;
-    throw new Error(typeof msg === "string" ? msg : JSON.stringify(msg));
+    throw new Error(errorEnEspanol(typeof msg === "string" ? msg : JSON.stringify(msg),res.status));
   }
   return res.json();
 }
@@ -173,7 +182,7 @@ export async function downloadPdfReport({
   }
   const base = API_BASE.replace(/\/+$/, "");
   const url = `${base}/export/pdf-report?${params}`;
-  const res = await fetch(url, { headers: headers() });
+  const res = await fetchSeguro(url, { headers: headers() });
   if (res.status === 401) {
     localStorage.removeItem("authToken");
     localStorage.removeItem("userName");
@@ -184,12 +193,12 @@ export async function downloadPdfReport({
     const msg = Array.isArray(err.detail)
       ? err.detail.map((e) => e.msg || JSON.stringify(e)).join(". ")
       : err.detail || res.statusText;
-    throw new Error(typeof msg === "string" ? msg : JSON.stringify(msg));
+    throw new Error(errorEnEspanol(typeof msg === "string" ? msg : JSON.stringify(msg),res.status));
   }
   const blob = await res.blob();
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = `water-demand-report-${Date.now()}.pdf`;
+  a.download = `HIDRO_informe-${Date.now()}.pdf`;
   a.click();
   URL.revokeObjectURL(a.href);
 }

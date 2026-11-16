@@ -184,28 +184,14 @@ async def _ai_structured_analysis(payload: dict) -> dict[str, str]:
 
     if not key:
         return {
-            "executive": (
-                "This report consolidates estimated neighborhood water demand using the same model as the dashboard. "
-                "Use the following sections for KPIs, land-use shares, spatial patterns, forecast trajectories, and scenario gaps. "
-                "Configure OPENAI_API_KEY on the server for an AI-written executive narrative."
-            ),
-            "findings": (
-                "- Demand scales with population, land-use mix, and the selected per-capita scenario.\n"
-                "- The forecast applies compound growth to current yearly baselines for both 0.09 and 0.1 m³/c cases.\n"
-                "- Map snippets summarize parcel locations and relative intensity; they are not satellite basemaps."
-            ),
-            "recommendations": (
-                "- Cross-check model outputs with local planning assumptions and any available meter samples.\n"
-                "- Re-run the export after updating parcel data or scenario controls.\n"
-                "- Use the dashboard map for interactive exploration of individual parcels."
-            ),
-            "limitations": (
-                "Figures are model estimates, not metered billing data. Growth is a simple compound rate on aggregates; "
-                "spatial plots omit street basemap tiles."
-            ),
+            "executive": "Este informe reúne la demanda estimada del territorio con el modelo de HIDRO. Incluye indicadores, distribución por uso, mapas y proyecciones.",
+            "findings": "La demanda depende de los habitantes, el uso y la dotación seleccionada. La proyección aplica crecimiento anual compuesto a los dos escenarios.",
+            "recommendations": "Contrasta los resultados con mediciones disponibles. Actualiza los predios y vuelve a generar el informe para consultar los cambios.",
+            "limitations": "Las cifras son estimaciones; no son lecturas de medidores. Los mapas son gráficos estáticos sin mapa base de calles.",
         }
 
-    instructions = """Write a structured utility-planning report using ONLY the facts provided.
+    instructions = """Escribe todo el contenido en español. Conserva únicamente los cuatro encabezados técnicos indicados para procesar la respuesta.
+Write a structured utility-planning report using ONLY the facts provided.
 
 Output exactly in this format (include the words EXECUTIVE, FINDINGS, RECOMMENDATIONS, LIMITATIONS as line headers):
 
@@ -239,15 +225,15 @@ Rules: Use m³ for volumes (1 m³ = 1000 L). No invented numbers. Professional n
         raw = (resp.choices[0].message.content or "").strip()
         parsed = _parse_ai_sections(raw)
         if not any(parsed.values()):
-            parsed["executive"] = raw or "Analysis unavailable."
+            parsed["executive"] = raw or "Análisis no disponible."
         return parsed
     except Exception as e:
         logger.warning("AI structured analysis failed: %s", e)
         return {
-            "executive": "Automated analysis could not be generated; tables and charts remain valid.",
+            "executive": "No se pudo generar el análisis automático. Las tablas y gráficos siguen disponibles.",
             "findings": "",
             "recommendations": "",
-            "limitations": str(e)[:200],
+            "limitations": "El análisis automático no está disponible en este momento.",
         }
 
 

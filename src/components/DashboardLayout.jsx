@@ -35,7 +35,7 @@ const DashboardLayout = () => {
         landUse: reportLandUse,
       });
     } catch (e) {
-      alert(e?.message || 'Could not generate the PDF. Is the backend running and are you logged in?');
+      alert(e?.message || "No se pudo generar el PDF. Verifica tu sesión e intenta de nuevo.");
     } finally {
       setExportLoading(false);
     }

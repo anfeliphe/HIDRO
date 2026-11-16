@@ -47,97 +47,37 @@ function persistMessages(messages) {
 }
 
 const suggestedQuestions = [
-  'What is the total estimated consumption for the neighborhood?',
-  'Consumption by parcel type (residential, commercial, mixed-use)',
-  'Growth projections: what will demand be in 5 years with 3% growth?',
-  'Compare scenarios: 0.09 m³/c vs 0.1 m³/c per person per day.',
+  "¿Cuál es la demanda total estimada del territorio?",
+  "Demanda por uso del predio: residencial, comercial y mixto",
+  "¿Cuál será la demanda en 5 años con un crecimiento del 3 %?",
+  "Compara los escenarios de 90 y 100 litros por persona al día.",
 ];
 
-async function loadAllParcelsForChat() {
- const rows=await api.apiFetch('/census/unified');
- return rows.filter(r=>r.demanda_diaria_90_m3!=null).map(r=>({parcel_id:r.id_predio_demo,population:r.numero_habitantes,yearly90:r.demanda_diaria_90_m3*1000*365,yearly100:r.demanda_diaria_100_m3*1000*365}));
-}
-
 async function getAnswerForQuestion(question, growthRate = 2, years = 5) {
-  const q = question.toLowerCase().trim();
-  try {
-    const thresholdConsumption =
-      q.match(/(?:more than|greater than|over|above)\s+(\d+)\s+(?:people|persons|residents|inhabitants)\b/) ||
-      q.match(
-        /(?:properties?|parcels?|lots?)\s+with\s+(?:more than|over|above)\s+(\d+)\s+(?:people|persons)\b/,
-      );
-    if (
-      thresholdConsumption &&
-      /\b(consumption|demand|percentage|percent|share|proportion|correspond)\b/.test(q)
-    ) {
-      const t = parseInt(thresholdConsumption[1], 10);
-      if (t >= 0 && t <= 2000) {
-        const parcels = await loadAllParcelsForChat();
-        const over = parcels.filter((p) => p.population > t);
-        const y90Over = over.reduce((s, p) => s + p.yearly90, 0);
-        const y90Total = parcels.reduce((s, p) => s + p.yearly90, 0);
-        const y100Over = over.reduce((s, p) => s + p.yearly100, 0);
-        const y100Total = parcels.reduce((s, p) => s + p.yearly100, 0);
-        const pct90 = y90Total > 0 ? ((y90Over / y90Total) * 100).toFixed(1) : '0';
-        const pct100 = y100Total > 0 ? ((y100Over / y100Total) * 100).toFixed(1) : '0';
-        return `**Consumption for parcels with more than ${t} people** (from parcel records):\n• **Parcels matching:** ${over.length} of ${parcels.length}\n• **Share of neighborhood yearly demand (0.09 m³/c basis):** ${pct90}% (${api.formatM3(y90Over)} of ${api.formatM3(y90Total)})\n• **Share (0.1 m³/c basis):** ${pct100}% (${api.formatM3(y100Over)} of ${api.formatM3(y100Total)})\n\nOnly parcels whose **population** is strictly greater than ${t} are included.`;
-      }
-    }
-
-    if (
-      /\b(population|people|residents|inhabitants|persons)\b/.test(q) ||
-      /\bhow many\s+(people|persons|residents)\b/.test(q) ||
-      /\bnumber of\s+(people|persons|residents)\b/.test(q)
-    ) {
-      const [all, res, com, mix] = await Promise.all([
-        api.getSummary(90, null),
-        api.getSummary(90, 'Residential'),
-        api.getSummary(90, 'Commercial'),
-        api.getSummary(90, 'Mixed-use'),
-      ]);
-      return `**Population (people in parcels — from parcel records):**\n• **Neighborhood total:** ${all.population.toLocaleString()}\n• **Residential:** ${res.population.toLocaleString()} people\n• **Commercial:** ${com.population.toLocaleString()} people\n• **Mixed-use:** ${mix.population.toLocaleString()} people\n\nEach parcel stores an estimated population used for water-demand calculations.`;
-    }
-
-    if (/\b(total|yearly|year|daily|monthly|demand|consumption|neighborhood|aggregate)\b/.test(q) && !/\b(by|per|type|parcel|residential|commercial|mixed)\b/.test(q)) {
-      const [s90, s100] = await Promise.all([api.getSummary(90), api.getSummary(100)]);
-      return `**Total estimated consumption (neighborhood):**\n• **0.09 m³/c scenario:** ${api.formatM3(s90.yearly)} yearly, ${api.formatM3(s90.daily)} daily. Population: ${s90.population.toLocaleString()}.\n• **0.1 m³/c scenario:** ${api.formatM3(s100.yearly)} yearly, ${api.formatM3(s100.daily)} daily.\n\nThese are aggregated from all parcels using the current parcel attributes and land-use coefficients.`;
-    }
-
-    if (/\b(parcel type|land use|land-use|residential|commercial|mixed|category|breakdown|compare.*usage)\b/.test(q)) {
-      const { breakdown } = await api.getLandUseBreakdown();
-      const lines = breakdown.map((b) => `• **${b.type}:** ${b.count} parcels, ${api.formatM3(b.consumption)}/year (${b.percentage}%)`).join('\n');
-      return `**Consumption by parcel type:**\n${lines}\n\nThis shows how total demand is distributed across Residential, Commercial, and Mixed-use parcels.`;
-    }
-
-    if (/\b(growth|future|projection|forecast|year.*growth|5 year|predict|increase.*consumption|increase.*demand)\b/.test(q)) {
-      const fromToPct = q.match(
-        /from\s+(\d+(?:\.\d+)?)\s*(?:%|percent)\s+to\s+(\d+(?:\.\d+)?)\s*(?:%|percent)/,
-      );
-      const nToNPct = q.match(/\b(\d+(?:\.\d+)?)\s+to\s+(\d+(?:\.\d+)?)\s*(?:%|percent)\b/);
-      const simple = q.match(/(\d+(?:\.\d+)?)\s*%\s*growth|growth\s*(?:of|at)?\s*(\d+(?:\.\d+)?)/);
-      const rate = fromToPct
-        ? parseFloat(fromToPct[2])
-        : nToNPct
-          ? parseFloat(nToNPct[2])
-          : simple
-            ? parseFloat(simple[1] || simple[2])
-            : growthRate;
-      const { data } = await api.getForecast(rate, years);
-      const last = data[data.length - 1];
-      const first = data[0];
-      return `**Demand forecast** (${rate}% annual growth, ${years}-year horizon):\n• **Year 0 (current):** 0.09 m³/c → ${api.formatM3(first?.year90)}, 0.1 m³/c → ${api.formatM3(first?.year100)}.\n• **Year ${years}:** 0.09 m³/c → ${api.formatM3(last?.year90)}, 0.1 m³/c → ${api.formatM3(last?.year100)}.\n\nThis assumes compound growth applied to current neighborhood consumption; it can reflect population growth and urban demand trends.`;
-    }
-
-    if (/\b(scenario|90\s*L|100\s*L|0\.09|0\.1|m³|90\s*vs|100\s*vs|compare.*scenario|difference)\b/.test(q)) {
-      const res = await api.getScenarioComparison();
-      const [a, b] = res.comparison;
-      return `**Scenario comparison (yearly demand):**\n• **${a.name}:** ${api.formatM3(a.value)}\n• **${b.name}:** ${api.formatM3(b.value)}\n• **Difference:** ${api.formatM3(res.difference)} more per year under 0.1 m³/c.\n\nThis compares the two standard assumptions (0.09 m³/c vs 0.1 m³/c per person per day) for the current parcel data.`;
-    }
-
-    return `I can answer questions about:\n• **Total estimated consumption** (daily, monthly, yearly)\n• **Consumption by parcel type** (residential, commercial, mixed-use)\n• **Growth projections** (future demand with a given % growth)\n• **Scenario comparison** (0.09 m³/c vs 0.1 m³/c)\n\nTry one of the suggested questions or rephrase yours.`;
-  } catch (err) {
-    return `I couldn't load the latest data (${err.message}). Make sure you're logged in and the backend is running, then try again.`;
+ const q=question.toLowerCase();
+ const n=v=>Number(v).toLocaleString('es-CO',{maximumFractionDigits:2});
+ try{
+  const rows=await api.apiFetch('/census/unified');
+  const eligible=rows.filter(r=>r.demanda_diaria_90_m3!=null);
+  const sum=(rs,key)=>rs.reduce((t,r)=>t+(r[key]??0),0);
+  const daily=sum(eligible,'demanda_diaria_90_m3'),high=sum(eligible,'demanda_diaria_100_m3');
+  const scope=`Cálculo sobre ${eligible.length} de ${rows.length} predios. Son estimaciones de demanda, no lecturas de medidores.`;
+  if(/crecimiento|proyec|futur|años|forecast|growth/.test(q)){
+   const rateMatch=q.match(/(\d+(?:[.,]\d+)?)\s*%/),yearMatch=q.match(/(\d+)\s*(?:años|years)/);
+   const rate=rateMatch?Number(rateMatch[1].replace(',','.')):Number(growthRate);
+   const horizon=yearMatch?Number(yearMatch[1]):Number(years);
+   if(rate<0||rate>20||horizon<1||horizon>20)return 'Usa un crecimiento entre 0 y 20 % y un horizonte entre 1 y 20 años.';
+   const factor=(1+rate/100)**horizon;
+   return `**Proyección a ${horizon} años con ${n(rate)} % de crecimiento anual:**\n\n- 90 L/persona/día: **${n(daily*365*factor)} m³/año**.\n- 100 L/persona/día: **${n(high*365*factor)} m³/año**.\n\n${scope}`;
   }
+  const threshold=q.match(/(?:más de|mas de|mayor que)\s+(\d+)\s*(?:personas|habitantes)/);
+  if(threshold){const group=eligible.filter(r=>r.numero_habitantes>Number(threshold[1]));const amount=sum(group,'demanda_diaria_90_m3');return `**${group.length} predios con más de ${threshold[1]} habitantes:** ${n(amount*365)} m³/año en el escenario de 90 L/persona/día (${daily?n(amount/daily*100):'0'} % de la demanda).\n\n${scope}`;}
+  if(/habitantes|población|personas|population/.test(q))return `**Habitantes informados:** ${n(sum(rows,'numero_habitantes'))}.\n\n${rows.filter(r=>r.numero_habitantes==null).length} predios sin dato de habitantes.`;
+  if(/uso|residencial|comercial|mixto|tipo/.test(q))return '**Demanda diaria por uso (90 L/persona/día):**\n\n'+[...new Set(eligible.map(r=>r.clase_uso))].map(u=>`- ${u}: ${n(sum(eligible.filter(r=>r.clase_uso===u),'demanda_diaria_90_m3'))} m³/día.`).join('\n')+`\n\n${scope}`;
+  if(/escenario|compara|diferencia/.test(q))return `**Comparación anual:**\n\n- 90 L/persona/día: ${n(daily*365)} m³/año.\n- 100 L/persona/día: ${n(high*365)} m³/año.\n- Diferencia: ${n((high-daily)*365)} m³/año.\n\n${scope}`;
+  if(/total|demanda|consumo/.test(q))return `**Demanda estimada a 90 L/persona/día:**\n\n- Diaria: ${n(daily)} m³.\n- Mensual (30 días): ${n(daily*30)} m³.\n- Anual (365 días): ${n(daily*365)} m³.\n\n${scope}`;
+  return 'Puedo consultar la demanda total, los habitantes, los usos del predio, las proyecciones y los escenarios. Selecciona una pregunta sugerida o indica qué dato deseas consultar.';
+ }catch(e){return `No se pudieron cargar los datos: ${e.message}`;}
 }
 
 function TypingIndicator() {
@@ -201,13 +141,13 @@ const Chat = () => {
           projection_years: projectionYears,
           history,
         });
-        answer = res.reply || 'No reply from assistant.';
+        answer = res.reply || "El asistente no devolvió una respuesta.";
       } catch (err) {
         usedFallback = true;
         answer = await getAnswerForQuestion(text, growthRate, projectionYears);
       }
       const fallbackNotice = usedFallback
-        ? '*Assistant unavailable — showing data from the dashboard.*\n\n'
+        ? '*Asistente no disponible. Respuesta calculada con los datos de HIDRO.*\n\n'
         : '';
       setMessages((prev) => [...prev, { type: 'ai', text: fallbackNotice + answer }]);
       setLoading(false);
@@ -241,7 +181,7 @@ const Chat = () => {
             className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm transition hover:border-blue-300 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Plus size={14} />
-            New chat
+            Nueva conversación
           </button>
         </div>
       </div>
@@ -257,14 +197,14 @@ const Chat = () => {
                 <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/25">
                   <Sparkles className="h-7 w-7 text-white" />
                 </div>
-                <h3 className="mb-2 text-xl font-semibold text-gray-900">Ask about water consumption</h3>
+                <h3 className="mb-2 text-xl font-semibold text-gray-900">Consulta la demanda de agua</h3>
                 <p className="mx-auto max-w-md text-sm leading-relaxed text-gray-600">
-                  Totals by scenario, land use, growth forecasts, and comparisons — formatted clearly, like a conversation.
+                  Consulta totales, usos del predio, proyecciones y comparaciones en una conversación.
                 </p>
               </div>
               <div>
                 <p className="mb-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500">
-                  Suggested questions
+                  Preguntas sugeridas
                 </p>
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                   {suggestedQuestions.map((question, index) => (
@@ -295,7 +235,7 @@ const Chat = () => {
                     </div>
                   ) : (
                     <div className="w-full max-w-[min(100%,40rem)]">
-                      <p className="mb-1.5 text-xs font-medium text-gray-500">Assistant</p>
+                      <p className="mb-1.5 text-xs font-medium text-gray-500">Asistente</p>
                       <div className="rounded-2xl rounded-bl-md border border-gray-100 bg-gray-50/90 px-4 py-3 shadow-sm ring-1 ring-gray-100/80">
                         <ChatMarkdown>{msg.text}</ChatMarkdown>
                       </div>
@@ -305,7 +245,7 @@ const Chat = () => {
               ))}
               {loading && (
                 <div className="flex w-full max-w-[min(100%,40rem)] flex-col">
-                  <p className="mb-1.5 text-xs font-medium text-gray-500">Assistant</p>
+                  <p className="mb-1.5 text-xs font-medium text-gray-500">Asistente</p>
                   <div className="rounded-2xl rounded-bl-md border border-gray-100 bg-gray-50/90 px-5 py-3 shadow-sm ring-1 ring-gray-100/80">
                     <TypingIndicator />
                   </div>
@@ -331,7 +271,7 @@ const Chat = () => {
               e.preventDefault();
               sendMessage();
             }}
-            placeholder="Message…"
+            placeholder="Escribe tu pregunta…"
             className="max-h-40 min-h-[44px] flex-1 resize-none bg-transparent py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none"
           />
           <button
@@ -339,13 +279,13 @@ const Chat = () => {
             onClick={() => sendMessage()}
             disabled={loading || !input.trim()}
             className="mb-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md transition hover:from-blue-700 hover:to-indigo-700 disabled:cursor-not-allowed disabled:opacity-40"
-            aria-label="Send"
+            aria-label="Enviar"
           >
             <Send size={18} />
           </button>
         </div>
         <p className="mx-auto mt-2 max-w-3xl text-center text-[11px] text-gray-400">
-          Estimates from parcel data — not live meter readings.
+          Estimaciones basadas en los predios; no corresponden a lecturas de medidores en tiempo real.
         </p>
       </div>
     </div>

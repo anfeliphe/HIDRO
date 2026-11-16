@@ -31,15 +31,15 @@ const Login = () => {
     const newErrors = {};
     
     if (!formData.email) {
-      newErrors.email = 'Email is required';
+      newErrors.email = "El correo electrónico es obligatorio";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid';
+      newErrors.email = "El correo electrónico no es válido";
     }
     
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = "La contraseña es obligatoria";
     } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+      newErrors.password = "La contraseña debe tener al menos 6 caracteres";
     }
     
     setErrors(newErrors);
@@ -62,7 +62,7 @@ const Login = () => {
       if (data.user?.id) localStorage.setItem('userId', String(data.user.id));
       navigate('/');
     } catch (err) {
-      setErrors({ form: err.message || 'Login failed' });
+      setErrors({ form: err.message || "No se pudo iniciar sesión" });
     } finally {
       setIsLoading(false);
     }
@@ -127,10 +127,10 @@ const Login = () => {
             <Droplet className="text-white" size={28} />
           </div>
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent mb-2">
-            Welcome Back
+            Te damos la bienvenida
           </h1>
           <p className="text-xs sm:text-sm md:text-base text-gray-600 px-4">
-            Sign in to access your water demand dashboard
+            Inicia sesión para acceder a HIDRO
           </p>
         </div>
 
@@ -143,7 +143,7 @@ const Login = () => {
             {/* Email Field */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address
+                Correo electrónico
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -167,7 +167,7 @@ const Login = () => {
             {/* Password Field */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Password
+                Contraseña
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -180,7 +180,7 @@ const Login = () => {
                   value={formData.password}
                   onChange={handleChange}
                   className={`input-field w-full pl-10 pr-10 ${errors.password ? 'border-red-500 focus:ring-red-500' : ''}`}
-                  placeholder="Enter your password"
+                  placeholder="Escribe tu contraseña"
                 />
                 <button
                   type="button"
@@ -202,13 +202,13 @@ const Login = () => {
                   type="checkbox"
                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
-                <span className="ml-2 text-gray-600">Remember me</span>
+                <span className="ml-2 text-gray-600">Recordarme</span>
               </label>
               <Link
                 to="/forgot-password"
                 className="text-blue-600 hover:text-blue-700 font-medium"
               >
-                Forgot password?
+                ¿Olvidaste tu contraseña?
               </Link>
             </div>
 
@@ -221,24 +221,24 @@ const Login = () => {
               {isLoading ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  <span>Signing in...</span>
+                  <span>Iniciando sesión…</span>
                 </>
               ) : (
                 <>
                   <LogIn size={20} />
-                  <span>Sign In</span>
+                  <span>Iniciar sesión</span>
                 </>
               )}
             </button>
 
             {/* Sign Up Link */}
             <p className="text-center text-sm text-gray-600 mt-6">
-              Don't have an account?{' '}
+              ¿No tienes una cuenta?{' '}
               <Link
                 to="/signup"
                 className="text-blue-600 hover:text-blue-700 font-semibold"
               >
-                Sign up for free
+                Crear una cuenta
               </Link>
             </p>
           </form>
@@ -246,10 +246,10 @@ const Login = () => {
 
         {/* Footer */}
         <p className="text-center text-xs text-gray-500 mt-6">
-          By signing in, you agree to our{' '}
-          <Link to="/terms" className="text-blue-600 hover:underline">Terms of Service</Link>
-          {' '}and{' '}
-          <Link to="/privacy" className="text-blue-600 hover:underline">Privacy Policy</Link>
+          Al iniciar sesión, aceptas los{' '}
+          <Link to="/terms" className="text-blue-600 hover:underline">Términos del servicio</Link>
+          {' '}y{' '}
+          <Link to="/privacy" className="text-blue-600 hover:underline">Política de privacidad</Link>
         </p>
       </div>
     </div>

@@ -35,33 +35,33 @@ const Signup = () => {
     const newErrors = {};
     
     if (!formData.name.trim()) {
-      newErrors.name = 'Name is required';
+      newErrors.name = "El nombre es obligatorio";
     } else if (formData.name.trim().length < 2) {
-      newErrors.name = 'Name must be at least 2 characters';
+      newErrors.name = "El nombre debe tener al menos 2 caracteres";
     }
     
     if (!formData.email) {
-      newErrors.email = 'Email is required';
+      newErrors.email = "El correo electrónico es obligatorio";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid';
+      newErrors.email = "El correo electrónico no es válido";
     }
     
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = "La contraseña es obligatoria";
     } else if (formData.password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters';
+      newErrors.password = "La contraseña debe tener al menos 8 caracteres";
     } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
-      newErrors.password = 'Password must contain uppercase, lowercase, and number';
+      newErrors.password = "La contraseña debe incluir mayúsculas, minúsculas y números";
     }
     
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Please confirm your password';
+      newErrors.confirmPassword = "Confirma tu contraseña";
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+      newErrors.confirmPassword = "Las contraseñas no coinciden";
     }
     
     if (!formData.organization.trim()) {
-      newErrors.organization = 'Organization is required';
+      newErrors.organization = "La organización es obligatoria";
     }
     
     setErrors(newErrors);
@@ -89,7 +89,7 @@ const Signup = () => {
       if (data.user?.id) localStorage.setItem('userId', String(data.user.id));
       navigate('/');
     } catch (err) {
-      setErrors({ form: err.message || 'Registration failed' });
+      setErrors({ form: err.message || "No se pudo crear la cuenta" });
     } finally {
       setIsLoading(false);
     }
@@ -154,10 +154,10 @@ const Signup = () => {
             <Droplet className="text-white" size={28} />
           </div>
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent mb-2">
-            Create Account
+            Crear cuenta
           </h1>
           <p className="text-xs sm:text-sm md:text-base text-gray-600 px-4">
-            Start managing your water demand analytics
+            Empieza a gestionar los datos de tu territorio
           </p>
         </div>
 
@@ -170,7 +170,7 @@ const Signup = () => {
             {/* Name Field */}
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                Full Name
+                Nombre completo
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -183,7 +183,7 @@ const Signup = () => {
                   value={formData.name}
                   onChange={handleChange}
                   className={`input-field w-full pl-10 ${errors.name ? 'border-red-500 focus:ring-red-500' : ''}`}
-                  placeholder="John Doe"
+                  placeholder="Nombre y apellido"
                 />
               </div>
               {errors.name && (
@@ -194,7 +194,7 @@ const Signup = () => {
             {/* Email Field */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address
+                Correo electrónico
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -218,7 +218,7 @@ const Signup = () => {
             {/* Organization Field */}
             <div>
               <label htmlFor="organization" className="block text-sm font-medium text-gray-700 mb-2">
-                Organization
+                Organización
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -231,7 +231,7 @@ const Signup = () => {
                   value={formData.organization}
                   onChange={handleChange}
                   className={`input-field w-full pl-10 ${errors.organization ? 'border-red-500 focus:ring-red-500' : ''}`}
-                  placeholder="Your Organization"
+                  placeholder="Tu organización"
                 />
               </div>
               {errors.organization && (
@@ -242,7 +242,7 @@ const Signup = () => {
             {/* Password Field */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Password
+                Contraseña
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -255,7 +255,7 @@ const Signup = () => {
                   value={formData.password}
                   onChange={handleChange}
                   className={`input-field w-full pl-10 pr-10 ${errors.password ? 'border-red-500 focus:ring-red-500' : ''}`}
-                  placeholder="Create a strong password"
+                  placeholder="Crea una contraseña segura"
                 />
                 <button
                   type="button"
@@ -269,14 +269,14 @@ const Signup = () => {
                 <p className="mt-1 text-xs text-red-600">{errors.password}</p>
               )}
               <p className="mt-1 text-xs text-gray-500">
-                Must contain uppercase, lowercase, and number
+                Debe incluir mayúsculas, minúsculas y números
               </p>
             </div>
 
             {/* Confirm Password Field */}
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                Confirm Password
+                Confirmar contraseña
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -289,7 +289,7 @@ const Signup = () => {
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   className={`input-field w-full pl-10 pr-10 ${errors.confirmPassword ? 'border-red-500 focus:ring-red-500' : ''}`}
-                  placeholder="Confirm your password"
+                  placeholder="Confirma tu contraseña"
                 />
                 <button
                   type="button"
@@ -313,13 +313,13 @@ const Signup = () => {
                 required
               />
               <label htmlFor="terms" className="ml-2 text-sm text-gray-600">
-                I agree to the{' '}
+                Acepto los{' '}
                 <Link to="/terms" className="text-blue-600 hover:text-blue-700 font-medium">
-                  Terms of Service
+                  Términos del servicio
                 </Link>
-                {' '}and{' '}
+                {' '}y{' '}
                 <Link to="/privacy" className="text-blue-600 hover:text-blue-700 font-medium">
-                  Privacy Policy
+                  Política de privacidad
                 </Link>
               </label>
             </div>
@@ -333,12 +333,12 @@ const Signup = () => {
               {isLoading ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  <span>Creating account...</span>
+                  <span>Creando cuenta…</span>
                 </>
               ) : (
                 <>
                   <UserPlus size={20} />
-                  <span>Create Account</span>
+                  <span>Crear cuenta</span>
                 </>
               )}
             </button>
@@ -349,7 +349,7 @@ const Signup = () => {
                 <div className="w-full border-t border-gray-300"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Or sign up with</span>
+                <span className="px-2 bg-white text-gray-500">O regístrate con</span>
               </div>
             </div>
 
@@ -365,18 +365,18 @@ const Signup = () => {
                   <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                   <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                 </svg>
-                Continue with Google
+                Continuar con Google
               </button>
             </div>
 
             {/* Sign In Link */}
             <p className="text-center text-sm text-gray-600 mt-6">
-              Already have an account?{' '}
+              ¿Ya tienes una cuenta?{' '}
               <Link
                 to="/login"
                 className="text-blue-600 hover:text-blue-700 font-semibold"
               >
-                Sign in
+                Iniciar sesión
               </Link>
             </p>
           </form>

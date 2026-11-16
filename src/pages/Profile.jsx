@@ -28,7 +28,7 @@ const Profile = () => {
         }
       })
       .catch((err) => {
-        if (!cancelled) setMessage({ type: 'error', text: err.message || 'Failed to load profile' });
+        if (!cancelled) setMessage({ type: 'error', text: err.message || "No se pudo cargar el perfil" });
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -45,11 +45,11 @@ const Profile = () => {
     e.preventDefault();
     setMessage({ type: '', text: '' });
     if (form.newPassword && form.newPassword !== form.confirmPassword) {
-      setMessage({ type: 'error', text: 'New password and confirmation do not match.' });
+      setMessage({ type: 'error', text: "La nueva contraseña y la confirmación no coinciden." });
       return;
     }
     if (form.newPassword && form.newPassword.length < 6) {
-      setMessage({ type: 'error', text: 'Password must be at least 6 characters.' });
+      setMessage({ type: 'error', text: "La contraseña debe tener al menos 6 caracteres." });
       return;
     }
     setSaving(true);
@@ -60,9 +60,9 @@ const Profile = () => {
       setProfile(data);
       if (data.name) localStorage.setItem('userName', data.name);
       setForm((f) => ({ ...f, newPassword: '', confirmPassword: '' }));
-      setMessage({ type: 'success', text: 'Profile updated successfully.' });
+      setMessage({ type: 'success', text: "Perfil actualizado correctamente." });
     } catch (err) {
-      setMessage({ type: 'error', text: err.message || 'Failed to update profile' });
+      setMessage({ type: 'error', text: err.message || "No se pudo actualizar el perfil" });
     } finally {
       setSaving(false);
     }
@@ -73,11 +73,11 @@ const Profile = () => {
       <div className="h-full flex flex-col">
         <div className="px-4 sm:px-6 pt-6 pb-4 bg-white/90 backdrop-blur-md border-b border-gray-200/60 lg:pl-6 pl-16">
           <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-            Profile
+            Perfil
           </h2>
         </div>
         <div className="flex-1 flex items-center justify-center p-6">
-          <span className="text-gray-500">Loading profile…</span>
+          <span className="text-gray-500">Cargando perfil…</span>
         </div>
       </div>
     );
@@ -87,9 +87,9 @@ const Profile = () => {
     <div className="h-full flex flex-col">
       <div className="px-4 sm:px-6 pt-6 pb-4 bg-white/90 backdrop-blur-md border-b border-gray-200/60 lg:pl-6 pl-16 animate-fade-in">
         <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-          Profile
+          Perfil
         </h2>
-        <p className="text-sm text-gray-500 mt-1">Manage your account details</p>
+        <p className="text-sm text-gray-500 mt-1">Administra los datos de tu cuenta</p>
       </div>
       <div className="flex-1 overflow-y-auto p-4 sm:p-6">
         <div className="max-w-xl mx-auto space-y-6">
@@ -111,14 +111,14 @@ const Profile = () => {
                 <User size={28} />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900">{profile?.name || 'User'}</h3>
+                <h3 className="font-semibold text-gray-900">{profile?.name || "Usuario"}</h3>
                 <p className="text-sm text-gray-500">{profile?.email}</p>
               </div>
             </div>
 
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                Name
+                Nombre
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
@@ -130,14 +130,14 @@ const Profile = () => {
                   value={form.name}
                   onChange={(e) => handleChange('name', e.target.value)}
                   className="input-field w-full pl-10"
-                  placeholder="Your name"
+                  placeholder="Tu nombre"
                 />
               </div>
             </div>
 
             <div>
               <label htmlFor="email-display" className="block text-sm font-medium text-gray-700 mb-1">
-                Email
+                Correo electrónico
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
@@ -151,12 +151,12 @@ const Profile = () => {
                   className="input-field w-full pl-10 bg-gray-50 text-gray-600 cursor-not-allowed"
                 />
               </div>
-              <p className="text-xs text-gray-500 mt-1">Email cannot be changed.</p>
+              <p className="text-xs text-gray-500 mt-1">El correo electrónico no se puede cambiar.</p>
             </div>
 
             <div>
               <label htmlFor="organization" className="block text-sm font-medium text-gray-700 mb-1">
-                Organization
+                Organización
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
@@ -168,17 +168,17 @@ const Profile = () => {
                   value={form.organization}
                   onChange={(e) => handleChange('organization', e.target.value)}
                   className="input-field w-full pl-10"
-                  placeholder="Organization or project"
+                  placeholder="Organización o proyecto"
                 />
               </div>
             </div>
 
             <div className="pt-4 border-t border-gray-200">
-              <h4 className="text-sm font-medium text-gray-900 mb-3">Change password</h4>
+              <h4 className="text-sm font-medium text-gray-900 mb-3">Cambiar contraseña</h4>
               <div className="space-y-3">
                 <div>
                   <label htmlFor="newPassword" className="block text-xs text-gray-600 mb-1">
-                    New password
+                    Nueva contraseña
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
@@ -190,14 +190,14 @@ const Profile = () => {
                       value={form.newPassword}
                       onChange={(e) => handleChange('newPassword', e.target.value)}
                       className="input-field w-full pl-10"
-                      placeholder="Leave blank to keep current"
+                      placeholder="Déjalo vacío para conservar la actual"
                       autoComplete="new-password"
                     />
                   </div>
                 </div>
                 <div>
                   <label htmlFor="confirmPassword" className="block text-xs text-gray-600 mb-1">
-                    Confirm new password
+                    Confirmar nueva contraseña
                   </label>
                   <input
                     id="confirmPassword"
@@ -205,7 +205,7 @@ const Profile = () => {
                     value={form.confirmPassword}
                     onChange={(e) => handleChange('confirmPassword', e.target.value)}
                     className="input-field w-full"
-                    placeholder="Confirm new password"
+                    placeholder="Confirmar nueva contraseña"
                     autoComplete="new-password"
                   />
                 </div>
@@ -220,12 +220,12 @@ const Profile = () => {
               {saving ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Saving…
+                  Guardando…
                 </>
               ) : (
                 <>
                   <Save size={18} />
-                  Save changes
+                  Guardar cambios
                 </>
               )}
             </button>

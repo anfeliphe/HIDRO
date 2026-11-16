@@ -35,7 +35,7 @@ const AnalyticsPanel = ({ metrics, landUseBreakdown, scenario, growthRate, proje
   if (loading || !metrics) {
     return (
       <div className="h-full overflow-y-auto p-4 sm:p-6 flex items-center justify-center">
-        <span className="text-gray-500">Loading analytics…</span>
+        <span className="text-gray-500">Cargando análisis…</span>
       </div>
     );
   }
@@ -63,36 +63,36 @@ const AnalyticsPanel = ({ metrics, landUseBreakdown, scenario, growthRate, proje
     <div className="h-full overflow-auto p-4 sm:p-6 space-y-4 sm:space-y-6 bg-transparent min-w-0">
       {selectedLandUse && selectedLandUse !== 'All' && (
         <p className="text-xs font-medium text-blue-700 bg-blue-50 px-2 py-1 rounded-md w-fit">
-          Filter: {selectedLandUse}
+          Filtro: {selectedLandUse}
         </p>
       )}
       {/* Summary Metrics */}
       <div className="grid grid-cols-2 gap-2 sm:gap-3">
         <SummaryCard
           icon={Droplet}
-          label="Daily"
+          label="Diaria"
           value={formatM3(metrics.daily)}
           color="blue"
           delay={0}
         />
         <SummaryCard
           icon={Calendar}
-          label="Monthly"
+          label="Mensual"
           value={formatM3(metrics.monthly)}
           color="green"
           delay={50}
         />
         <SummaryCard
           icon={TrendingUp}
-          label="Yearly"
+          label="Anual"
           value={formatM3(metrics.yearly)}
           color="purple"
           delay={100}
         />
         <SummaryCard
           icon={Users}
-          label="Population"
-          value={metrics.population.toLocaleString()}
+          label="Habitantes"
+          value={metrics.population.toLocaleString('es-CO')}
           color="orange"
           delay={150}
         />
@@ -103,7 +103,7 @@ const AnalyticsPanel = ({ metrics, landUseBreakdown, scenario, growthRate, proje
         className="card-gradient opacity-0 animate-fade-in-up min-w-0 overflow-visible"
         style={{ animationDelay: '200ms', animationFillMode: 'forwards' }}
       >
-        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Land-Use Breakdown</h3>
+        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Distribución por uso</h3>
         <div className="flex flex-wrap items-center gap-4 sm:gap-6">
           <div className="w-full sm:flex-1 min-w-[160px]" style={{ minHeight: 200 }}>
             <ResponsiveContainer width="100%" height={200}>
@@ -146,8 +146,8 @@ const AnalyticsPanel = ({ metrics, landUseBreakdown, scenario, growthRate, proje
         style={{ animationDelay: '280ms', animationFillMode: 'forwards' }}
       >
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base sm:text-lg font-semibold text-gray-900">Demand Forecast</h3>
-          <span className="text-xs sm:text-sm text-gray-600 bg-blue-50 px-2 py-1 rounded-md">{growthRate}% growth · {projectionYears} year{projectionYears !== 1 ? 's' : ''}</span>
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900">Proyección de demanda</h3>
+          <span className="text-xs sm:text-sm text-gray-600 bg-blue-50 px-2 py-1 rounded-md">{growthRate}% de crecimiento · {projectionYears} año{projectionYears !== 1 ? 's' : ''}</span>
         </div>
         {forecastData.length > 0 ? (
         <ResponsiveContainer width="100%" height={200} className="sm:h-[250px]">
@@ -177,7 +177,7 @@ const AnalyticsPanel = ({ metrics, landUseBreakdown, scenario, growthRate, proje
           </LineChart>
         </ResponsiveContainer>
         ) : (
-          <div className="h-[200px] flex items-center justify-center text-gray-500 text-sm">Forecast from API (Analytics page loads it)</div>
+          <div className="h-[200px] flex items-center justify-center text-gray-500 text-sm">Proyección disponible en Análisis</div>
         )}
       </div>
       
@@ -186,7 +186,7 @@ const AnalyticsPanel = ({ metrics, landUseBreakdown, scenario, growthRate, proje
         className="card-gradient opacity-0 animate-fade-in-up"
         style={{ animationDelay: '360ms', animationFillMode: 'forwards' }}
       >
-        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Scenario Comparison (Yearly)</h3>
+        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Comparación de escenarios (anual)</h3>
         <ResponsiveContainer width="100%" height={200} className="sm:h-[250px]">
           <BarChart data={scenarioComparison}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -204,8 +204,8 @@ const AnalyticsPanel = ({ metrics, landUseBreakdown, scenario, growthRate, proje
           </BarChart>
         </ResponsiveContainer>
         <div className="mt-4 flex items-center gap-2 text-sm">
-          <span className="text-gray-600">Difference:</span>
-          <span className="font-semibold text-gray-900">{formatM3(difference)}/year</span>
+          <span className="text-gray-600">Diferencia:</span>
+          <span className="font-semibold text-gray-900">{formatM3(difference)}/año</span>
           <TrendingUp size={16} className="text-blue-600" />
         </div>
       </div>

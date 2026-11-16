@@ -18,30 +18,30 @@ const DataSources = () => {
 
   const dataSources = [
     {
-      name: 'Parcel dataset',
-      status: 'Active',
-      type: 'Parcels (GIS/CSV/upload)',
-      records: parcelTotal != null ? `${parcelTotal} parcels` : '—',
-      updated: 'As loaded',
+      name: "Datos de predios",
+      status: "Activo",
+      type: "Predios (SIG / CSV / carga)",
+      records: parcelTotal != null ? `${parcelTotal} predios` : '—',
+      updated: "Según la carga",
       icon: Map,
       color: 'blue',
     },
     {
-      name: 'Estimated consumption',
-      status: 'Active',
-      type: 'Model (0.09 / 0.1 m³/c per person per day)',
-      records: 'From parcel data',
-      updated: 'On demand',
+      name: "Demanda estimada",
+      status: "Activo",
+      type: "Modelo (0,09 / 0,1 m³ por persona al día)",
+      records: "A partir de los predios",
+      updated: "Al consultar",
       icon: Database,
       color: 'purple',
-      description: 'No real meter data; consumption is estimated from population and land-use.',
+      description: "La demanda se estima según los habitantes y el uso del predio.",
     },
     {
-      name: 'OpenStreetMap Basemap',
-      status: 'Connected',
-      type: 'Tile Service',
-      records: 'Live',
-      updated: 'Live',
+      name: "Mapa base de OpenStreetMap",
+      status: "Conectado",
+      type: "Servicio de mapas",
+      records: "En línea",
+      updated: "En línea",
       icon: Map,
       color: 'orange',
     },
@@ -56,7 +56,7 @@ const DataSources = () => {
 
   const handleUpload = async () => {
     if (!uploadFile) {
-      setUploadError('Please select a file.');
+      setUploadError("Selecciona un archivo.");
       return;
     }
     setUploading(true);
@@ -68,14 +68,14 @@ const DataSources = () => {
       setUploadFile(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
     } catch (err) {
-      setUploadError(err.message || 'Upload failed');
+      setUploadError(err.message || "No se pudo cargar el archivo");
     } finally {
       setUploading(false);
     }
   };
 
   const getStatusColor = (status) => {
-    if (status === 'Active' || status === 'Connected') {
+    if (status === "Activo" || status === "Conectado") {
       return 'bg-green-100 text-green-800';
     }
     return 'bg-gray-100 text-gray-800';
@@ -101,7 +101,7 @@ P-0003,Mixed-use,6,40.714,-74.004`;
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'parcels_sample.csv';
+    a.download = 'HIDRO_predios_ejemplo.csv';
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -110,7 +110,7 @@ P-0003,Mixed-use,6,40.714,-74.004`;
     <div className="h-full flex flex-col">
       <div className="px-4 sm:px-6 pt-6 pb-4 bg-white/90 backdrop-blur-md border-b border-gray-200/60 lg:pl-6 pl-16 animate-fade-in">
         <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-          Data Sources
+          Fuentes de datos
         </h2>
       </div>
       <div className="flex-1 overflow-y-auto p-4 sm:p-6">
@@ -124,9 +124,9 @@ P-0003,Mixed-use,6,40.714,-74.004`;
               <Upload size={24} />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Upload parcel dataset</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Importar datos de predios</h3>
               <p className="text-sm text-gray-600 mt-0.5">
-                Import parcels from CSV, JSON, or GeoJSON. Map and analytics will use the uploaded data.
+                Importa predios desde CSV, JSON o GeoJSON. El mapa y los análisis usarán estos datos.
               </p>
             </div>
           </div>
@@ -146,7 +146,7 @@ P-0003,Mixed-use,6,40.714,-74.004`;
                   onChange={(e) => setReplaceAll(e.target.checked)}
                   className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                 />
-                Replace all existing parcels
+                Reemplazar todos los predios anteriores
               </label>
             </div>
             <div className="flex flex-wrap items-center gap-3">
@@ -159,12 +159,12 @@ P-0003,Mixed-use,6,40.714,-74.004`;
                 {uploading ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Uploading…
+                    Cargando…
                   </>
                 ) : (
                   <>
                     <Upload size={18} />
-                    Upload file
+                    Cargar archivo
                   </>
                 )}
               </button>
@@ -174,7 +174,7 @@ P-0003,Mixed-use,6,40.714,-74.004`;
                 className="btn-secondary flex items-center gap-2"
               >
                 <Download size={18} />
-                Download sample CSV
+                Descargar CSV de ejemplo
               </button>
             </div>
             {uploadError && (
@@ -194,7 +194,7 @@ P-0003,Mixed-use,6,40.714,-74.004`;
                         <li key={i}>{e}</li>
                       ))}
                       {uploadResult.errors.length > 5 && (
-                        <li>… and {uploadResult.errors.length - 5} more</li>
+                        <li>… y {uploadResult.errors.length - 5} más</li>
                       )}
                     </ul>
                   )}
@@ -203,11 +203,11 @@ P-0003,Mixed-use,6,40.714,-74.004`;
             )}
           </div>
           <p className="text-xs text-gray-500 mt-4 pt-4 border-t border-gray-200">
-            Required columns: <code className="bg-gray-100 px-1 rounded">parcel_id</code>,{' '}
+            Columnas obligatorias: <code className="bg-gray-100 px-1 rounded">parcel_id</code>,{' '}
             <code className="bg-gray-100 px-1 rounded">land_use</code> (Residential | Commercial | Mixed-use),{' '}
             <code className="bg-gray-100 px-1 rounded">population</code>,{' '}
             <code className="bg-gray-100 px-1 rounded">lat</code>,{' '}
-            <code className="bg-gray-100 px-1 rounded">lng</code>. GeoJSON: use <code className="bg-gray-100 px-1 rounded">properties</code> and optional Point <code className="bg-gray-100 px-1 rounded">geometry</code> for lat/lng.
+            <code className="bg-gray-100 px-1 rounded">lng</code>. En GeoJSON utiliza <code className="bg-gray-100 px-1 rounded">properties</code> y, opcionalmente, una geometría de punto (Point) en <code className="bg-gray-100 px-1 rounded">geometry</code> para la latitud y longitud.
           </p>
         </div>
 
@@ -237,11 +237,11 @@ P-0003,Mixed-use,6,40.714,-74.004`;
 
                 <div className="space-y-2 pt-4 border-t border-gray-200">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600">Records:</span>
+                    <span className="text-gray-600">Registros:</span>
                     <span className="font-medium text-gray-900">{source.records}</span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600">Updated:</span>
+                    <span className="text-gray-600">Actualización:</span>
                     <span className="font-medium text-gray-900">{source.updated}</span>
                   </div>
                   {source.description && (

@@ -23,7 +23,7 @@ def pie_chart_bytes(labels: list[str], sizes: list[float], colors_hex: list[str]
         textprops={"fontsize": 9},
         wedgeprops={"edgecolor": "white", "linewidth": 1},
     )
-    ax.set_title("Water demand by land use (yearly)", fontsize=11, fontweight="bold", pad=10)
+    ax.set_title("Demanda anual por uso", fontsize=11, fontweight="bold", pad=10)
     buf = io.BytesIO()
     fig.savefig(buf, format="png", dpi=_PIE_DPI, bbox_inches="tight", facecolor="#fafafa")
     plt.close(fig)
@@ -41,9 +41,9 @@ def forecast_chart_bytes(
     fig, ax = plt.subplots(figsize=(6.5, 4))
     ax.plot(years_x, [v / 1e6 for v in y90], "o-", color="#2563eb", linewidth=2, label="0.09 m³/c", markersize=4)
     ax.plot(years_x, [v / 1e6 for v in y100], "s-", color="#059669", linewidth=2, label="0.1 m³/c", markersize=4)
-    ax.set_xlabel("Year index (0 = current)", fontsize=10)
-    ax.set_ylabel("Yearly demand (thousand m³)", fontsize=10)
-    ax.set_title(f"Demand forecast ({growth_pct}% growth / year, {horizon}-year horizon)", fontsize=11, fontweight="bold")
+    ax.set_xlabel("Año (0 = actual)", fontsize=10)
+    ax.set_ylabel("Demanda anual (miles de m³)", fontsize=10)
+    ax.set_title(f"Proyección: {growth_pct}% anual durante {horizon} años", fontsize=11, fontweight="bold")
     ax.legend(loc="upper left", framealpha=0.95)
     ax.grid(True, alpha=0.3)
     ax.set_facecolor("#fafafa")
@@ -146,7 +146,7 @@ def parcel_map_by_land_use_bytes(points: list[dict[str, Any]]) -> io.BytesIO | N
             [lngs[i] for i in other_idx],
             [lats[i] for i in other_idx],
             c=UNKNOWN_COLOR,
-            label="Other",
+            label="Otros",
             s=42,
             alpha=0.9,
             edgecolors="white",
@@ -156,11 +156,11 @@ def parcel_map_by_land_use_bytes(points: list[dict[str, Any]]) -> io.BytesIO | N
         plotted = True
 
     if not plotted:
-        ax.scatter(lngs, lats, c=UNKNOWN_COLOR, s=45, alpha=0.85, edgecolors="white", linewidths=0.4, label="Parcels")
+        ax.scatter(lngs, lats, c=UNKNOWN_COLOR, s=45, alpha=0.85, edgecolors="white", linewidths=0.4, label="Predios")
 
-    ax.set_xlabel("Longitude (°)", fontsize=10)
-    ax.set_ylabel("Latitude (°)", fontsize=10)
-    ax.set_title("Parcel locations by land use", fontsize=12, fontweight="bold", pad=8)
+    ax.set_xlabel("Longitud (°)", fontsize=10)
+    ax.set_ylabel("Latitud (°)", fontsize=10)
+    ax.set_title("Ubicación de predios por uso", fontsize=12, fontweight="bold", pad=8)
     ax.grid(True, alpha=0.35, linestyle="--", linewidth=0.6)
     ax.legend(loc="best", framealpha=0.92, fontsize=8)
     (x0, x1), (y0, y1) = _axis_limits_balanced(lats, lngs)
@@ -190,7 +190,7 @@ def parcel_map_by_demand_bytes(points: list[dict[str, Any]]) -> io.BytesIO | Non
 
     use_pop = not any(d > 0 for d in dem)
     values = [float(pop[i]) if use_pop else dem[i] for i in range(len(points))]
-    label = "Population (fallback)" if use_pop else "Yearly demand (liters, model)"
+    label = "Habitantes" if use_pop else "Demanda anual estimada (litros)"
     if not any(v > 0 for v in values):
         values = [1.0] * len(points)  # uniform
 
@@ -212,9 +212,9 @@ def parcel_map_by_demand_bytes(points: list[dict[str, Any]]) -> io.BytesIO | Non
     )
     cb = plt.colorbar(sc, ax=ax, shrink=0.78, pad=0.03, aspect=22)
     cb.set_label(label, fontsize=9)
-    ax.set_xlabel("Longitude (°)", fontsize=10)
-    ax.set_ylabel("Latitude (°)", fontsize=10)
-    title = "Relative intensity (population)" if use_pop else "Relative demand intensity (yearly)"
+    ax.set_xlabel("Longitud (°)", fontsize=10)
+    ax.set_ylabel("Latitud (°)", fontsize=10)
+    title = "Intensidad relativa de habitantes" if use_pop else "Intensidad relativa de demanda anual"
     ax.set_title(title, fontsize=12, fontweight="bold", pad=8)
     ax.grid(True, alpha=0.35, linestyle="--", linewidth=0.6)
     (x0, x1), (y0, y1) = _axis_limits_balanced(lats, lngs)

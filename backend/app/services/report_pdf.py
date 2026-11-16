@@ -78,7 +78,7 @@ def _footer(canvas, doc, muted):
     canvas.line(0.5 * inch, 0.62 * inch, W - 0.5 * inch, 0.62 * inch)
     canvas.setFont("Helvetica", 8)
     canvas.setFillColor(muted)
-    canvas.drawCentredString(W / 2, 0.45 * inch, f"Page {canvas.getPageNumber()}")
+    canvas.drawCentredString(W / 2, 0.45 * inch, f"Página {canvas.getPageNumber()}")
     canvas.restoreState()
 
 
@@ -94,7 +94,7 @@ def build_water_demand_report_pdf(data: dict[str, Any], ai_sections: dict[str, s
         leftMargin=0.6 * inch,
         topMargin=0.42 * inch,
         bottomMargin=0.58 * inch,
-        title="Water Demand Report",
+        title="Informe HIDRO",
     )
 
     styles = getSampleStyleSheet()
@@ -152,7 +152,7 @@ def build_water_demand_report_pdf(data: dict[str, Any], ai_sections: dict[str, s
 
     # --- Page 1: Cover + TOC only ---
     cover_band = Table(
-        [[Paragraph("<b><font color='white'>WATER DEMAND INTELLIGENCE</font></b>", ParagraphStyle("cb", alignment=TA_CENTER, fontSize=9))]],
+        [[Paragraph("<b><font color='white'>HIDRO · DEMANDA DE AGUA</font></b>", ParagraphStyle("cb", alignment=TA_CENTER, fontSize=9))]],
         colWidths=[6.9 * inch],
     )
     cover_band.setStyle(
@@ -168,40 +168,40 @@ def build_water_demand_report_pdf(data: dict[str, Any], ai_sections: dict[str, s
     story.append(cover_band)
     story.append(Spacer(1, 0.22 * inch))
 
-    story.append(Paragraph("Water Demand Assessment Report", title_style))
+    story.append(Paragraph("Informe de demanda de agua", title_style))
     story.append(
         Paragraph(
-            "Neighborhood consumption analysis &mdash; scenario-based estimates",
+            "Análisis del territorio &mdash; estimaciones por escenario",
             subtitle,
         )
     )
     gen = data.get("generated_at") or datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     scenario_label = escape(str(data.get("scenario_label", "")))
-    lu = escape(str(data.get("land_use_filter", "All")))
+    lu = escape({"All":"Todos","Residential":"Residencial","Commercial":"Comercial","Mixed-use":"Mixto"}.get(str(data.get("land_use_filter")),str(data.get("land_use_filter", "Todos"))))
     gr = data.get("growth_rate", 2)
     hy = data.get("horizon_years", 5)
     meta = (
-        f"<b>Generated:</b> {escape(gen)} &nbsp;|&nbsp; "
-        f"<b>Scenario:</b> {scenario_label} &nbsp;|&nbsp; "
-        f"<b>Growth:</b> {gr}% / year &nbsp;|&nbsp; "
-        f"<b>Horizon:</b> {hy} years &nbsp;|&nbsp; "
-        f"<b>Land use filter:</b> {lu}"
+        f"<b>Generado:</b> {escape(gen)} &nbsp;|&nbsp; "
+        f"<b>Escenario:</b> {scenario_label} &nbsp;|&nbsp; "
+        f"<b>Crecimiento:</b> {gr}% / año &nbsp;|&nbsp; "
+        f"<b>Horizonte:</b> {hy} años &nbsp;|&nbsp; "
+        f"<b>Filtro de uso:</b> {lu}"
     )
     story.append(Paragraph(meta, ParagraphStyle("Meta", parent=body, alignment=TA_CENTER, fontSize=9)))
     story.append(Spacer(1, 0.26 * inch))
 
-    story.append(Paragraph("<font color='#1d4ed8'><b>Table of Contents</b></font>", ParagraphStyle("TOC", fontSize=16, alignment=TA_CENTER, fontName="Helvetica-Bold", textColor=brand_blue, spaceAfter=10)))
+    story.append(Paragraph("<font color='#1d4ed8'><b>Contenido</b></font>", ParagraphStyle("TOC", fontSize=16, alignment=TA_CENTER, fontName="Helvetica-Bold", textColor=brand_blue, spaceAfter=10)))
     toc_rows = [
-        ["#", "Section", "Page"],
-        ["1", "Executive summary &amp; detailed AI analysis", "2"],
-        ["2", "Key metrics dashboard &amp; highlights", "3"],
-        ["3", "Land-use composition &amp; demand share", "4"],
-        ["4", "Spatial overview (parcel map snippets)", "5"],
-        ["5", "Demand forecast &amp; trajectory", "6"],
-        ["6", "Scenario comparison (0.09 vs 0.1 m³/c)", "7"],
-        ["7", "Parcel register (sample)", "8"],
-        ["8", "Data quality, assumptions &amp; limitations", "9"],
-        ["9", "Appendix &amp; report parameters", "10"],
+        ["#", "Sección", "Página"],
+        ["1", "Resumen ejecutivo y análisis", "2"],
+        ["2", "Indicadores principales", "3"],
+        ["3", "Distribución por uso y demanda", "4"],
+        ["4", "Distribución espacial de los predios", "5"],
+        ["5", "Proyección de demanda", "6"],
+        ["6", "Comparación de escenarios (0,09 y 0,1 m³/persona)", "7"],
+        ["7", "Registro de predios (muestra)", "8"],
+        ["8", "Calidad de datos, supuestos y limitaciones", "9"],
+        ["9", "Anexo y parámetros del informe", "10"],
     ]
     toc_table = Table(toc_rows, colWidths=[0.45 * inch, 5.0 * inch, 0.9 * inch])
     toc_table.setStyle(
@@ -223,7 +223,7 @@ def build_water_demand_report_pdf(data: dict[str, Any], ai_sections: dict[str, s
     story.append(Spacer(1, 0.1 * inch))
     story.append(
         Paragraph(
-            "<i>Page numbers follow this document&rsquo;s print order. Sections include charts, maps, and tables aligned with the web dashboard.</i>",
+            "<i>La numeración sigue el orden de impresión. El informe incluye gráficos, mapas y tablas de HIDRO.</i>",
             small,
         )
     )
@@ -236,17 +236,17 @@ def build_water_demand_report_pdf(data: dict[str, Any], ai_sections: dict[str, s
     rec_t = (ai_sections.get("recommendations") or "").strip()
     lim_t = (ai_sections.get("limitations") or "").strip()
 
-    story.append(Paragraph("1. Executive summary &amp; detailed AI analysis", h1))
-    story.extend(_para_block(exec_t or "Analysis is not available.", body))
-    story.append(Paragraph("<b>Key findings</b>", h2))
+    story.append(Paragraph("1. Resumen ejecutivo y análisis", h1))
+    story.extend(_para_block(exec_t or "El análisis no está disponible.", body))
+    story.append(Paragraph("<b>Hallazgos principales</b>", h2))
     story.extend(_para_block(find_t or "—", body))
-    story.append(Paragraph("<b>Recommendations</b>", h2))
+    story.append(Paragraph("<b>Recomendaciones</b>", h2))
     story.extend(_para_block(rec_t or "—", body))
-    story.append(Paragraph("<b>Scope &amp; limitations (AI)</b>", h2))
+    story.append(Paragraph("<b>Alcance y limitaciones del análisis</b>", h2))
     story.extend(_para_block(lim_t or "—", body))
     story.append(
         Paragraph(
-            "<i>AI narrative is generated from dashboard metrics and is advisory only.</i>",
+            "<i>El análisis se genera con los indicadores de HIDRO y tiene carácter orientativo.</i>",
             small,
         )
     )
@@ -254,15 +254,15 @@ def build_water_demand_report_pdf(data: dict[str, Any], ai_sections: dict[str, s
     story.append(PageBreak())
 
     # --- KPI ---
-    story.append(Paragraph("2. Key metrics dashboard &amp; highlights", h1))
+    story.append(Paragraph("2. Indicadores principales", h1))
     sm = data.get("summary") or {}
     pop = sm.get("population", 0)
     kpi_data = [
-        ["Metric", "Value"],
-        ["Daily demand (estimated)", _fmt_m3(float(sm.get("daily", 0)))],
-        ["Monthly demand (estimated)", _fmt_m3(float(sm.get("monthly", 0)))],
-        ["Yearly demand (estimated)", _fmt_m3(float(sm.get("yearly", 0)))],
-        ["Population (total)", f"{int(pop):,}"],
+        ["Indicador", "Valor"],
+        ["Demanda diaria estimada", _fmt_m3(float(sm.get("daily", 0)))],
+        ["Demanda mensual estimada", _fmt_m3(float(sm.get("monthly", 0)))],
+        ["Demanda anual estimada", _fmt_m3(float(sm.get("yearly", 0)))],
+        ["Habitantes informados", f"{int(pop):,}"],
     ]
     t = Table(kpi_data, colWidths=[2.5 * inch, 3.7 * inch])
     t.setStyle(
@@ -283,8 +283,8 @@ def build_water_demand_report_pdf(data: dict[str, Any], ai_sections: dict[str, s
     story.append(Spacer(1, 0.08 * inch))
     story.append(
         Paragraph(
-            "<b>Highlights:</b> These KPIs mirror the dashboard cards for the selected per-capita scenario "
-            f"({scenario_label}) and land-use filter ({lu}).",
+            "<b>Indicadores:</b> Estos indicadores corresponden al escenario por persona seleccionado "
+            f"({scenario_label}) y al filtro de uso ({lu}).",
             body,
         )
     )
@@ -294,15 +294,15 @@ def build_water_demand_report_pdf(data: dict[str, Any], ai_sections: dict[str, s
     # --- Land use ---
     breakdown = data.get("breakdown") or []
     sizes = [float(b.get("consumption", 0) or 0) for b in breakdown]
-    labels = [str(b.get("type", "")) for b in breakdown]
+    labels = [{"Residential":"Residencial","Commercial":"Comercial","Mixed-use":"Mixto"}.get(b.get("type"),str(b.get("type", ""))) for b in breakdown]
     pie_colors = ["#3b82f6", "#14b8a6", "#f59e0b"]
 
-    story.append(Paragraph("3. Land-use composition &amp; demand share", h1))
-    rows = [["Land use", "Parcels", "Share (%)", "Yearly demand"]]
+    story.append(Paragraph("3. Distribución por uso y demanda", h1))
+    rows = [["Uso", "Predios", "Participación (%)", "Demanda anual"]]
     for b in breakdown:
         rows.append(
             [
-                str(b.get("type", "")),
+                {"Residential":"Residencial","Commercial":"Comercial","Mixed-use":"Mixto"}.get(b.get("type"),str(b.get("type", ""))),
                 str(b.get("count", "")),
                 f"{b.get('percentage', '0')}%",
                 _fmt_m3(float(b.get("consumption", 0))),
@@ -333,7 +333,7 @@ def build_water_demand_report_pdf(data: dict[str, Any], ai_sections: dict[str, s
     story.append(Spacer(1, 0.12 * inch))
 
     # --- Maps (embed land-use and demand figures independently) ---
-    story.append(Paragraph("4. Spatial overview (parcel map snippets)", h1))
+    story.append(Paragraph("4. Distribución espacial de los predios", h1))
     pts = data.get("parcel_points") or []
     buf_land = parcel_map_by_land_use_bytes(pts)
     buf_dem = parcel_map_by_demand_bytes(pts)
@@ -342,8 +342,8 @@ def build_water_demand_report_pdf(data: dict[str, Any], ai_sections: dict[str, s
     if buf_land and buf_dem:
         story.append(
             Paragraph(
-                "The following figures approximate the dashboard map: <b>left</b> &mdash; parcels colored by land use; "
-                "<b>right</b> &mdash; relative intensity (demand, or population when demand is uniform).",
+                "Los gráficos representan el territorio: <b>izquierda</b>, predios por uso; "
+                "<b>derecha</b>, intensidad relativa de demanda o habitantes cuando la demanda es uniforme.",
                 body,
             )
         )
@@ -365,7 +365,7 @@ def build_water_demand_report_pdf(data: dict[str, Any], ai_sections: dict[str, s
     elif buf_land:
         story.append(
             Paragraph(
-                "Parcels colored by land use (demand map could not be generated).",
+                "Predios por uso; no se pudo generar el mapa de demanda.",
                 body,
             )
         )
@@ -374,7 +374,7 @@ def build_water_demand_report_pdf(data: dict[str, Any], ai_sections: dict[str, s
     elif buf_dem:
         story.append(
             Paragraph(
-                "Relative intensity map (land-use map could not be generated).",
+                "Intensidad relativa; no se pudo generar el mapa de usos.",
                 body,
             )
         )
@@ -383,7 +383,7 @@ def build_water_demand_report_pdf(data: dict[str, Any], ai_sections: dict[str, s
     else:
         story.append(
             Paragraph(
-                "<i>No parcel coordinates in scope; map snippets were skipped.</i>",
+                "<i>No hay coordenadas disponibles para generar los mapas.</i>",
                 body,
             )
         )
@@ -395,11 +395,11 @@ def build_water_demand_report_pdf(data: dict[str, Any], ai_sections: dict[str, s
     years_x = list(range(len(fc.get("year90", []))))
     y90 = fc.get("year90") or []
     y100 = fc.get("year100") or []
-    story.append(Paragraph("5. Demand forecast &amp; trajectory", h1))
+    story.append(Paragraph("5. Proyección de demanda", h1))
     story.append(
         Paragraph(
-            f"Compound growth at <b>{escape(str(gr))}%</b> per year over <b>{escape(str(hy))}</b> years "
-            "applied to neighborhood yearly baselines (both per-capita scenarios).",
+            f"Crecimiento compuesto del <b>{escape(str(gr))}%</b> anual durante <b>{escape(str(hy))}</b> años "
+            "aplicado a la demanda anual actual en ambos escenarios.",
             body,
         )
     )
@@ -408,7 +408,7 @@ def build_water_demand_report_pdf(data: dict[str, Any], ai_sections: dict[str, s
         line_buf = forecast_chart_bytes(years_x, y90, y100, float(gr), int(hy))
         story.append(_png_flowable(line_buf, 6.35 * inch, max_height=4.0 * inch))
         story.append(Spacer(1, 0.06 * inch))
-        fh = [["Year", "0.09 m³/c (yearly)", "0.1 m³/c (yearly)"]]
+        fh = [["Año", "0.09 m³/c (anual)", "0.1 m³/c (anual)"]]
         for i in range(len(y90)):
             fh.append([str(i), _fmt_m3(float(y90[i])), _fmt_m3(float(y100[i]))])
         tft = Table(fh, colWidths=[0.85 * inch, 2.45 * inch, 2.45 * inch])
@@ -429,14 +429,14 @@ def build_water_demand_report_pdf(data: dict[str, Any], ai_sections: dict[str, s
     story.append(Spacer(1, 0.12 * inch))
 
     # --- Scenario ---
-    story.append(Paragraph("6. Scenario comparison (0.09 vs 0.1 m³/c)", h1))
+    story.append(Paragraph("6. Comparación de escenarios (0,09 y 0,1 m³/persona)", h1))
     sc = data.get("scenario_comparison") or {}
     sct = Table(
         [
-            ["Scenario", "Yearly demand (approx.)"],
+            ["Escenario", "Demanda anual (aproximada)"],
             ["0.09 m³/c", _fmt_m3(float(sc.get("low", 0)))],
             ["0.1 m³/c", _fmt_m3(float(sc.get("high", 0)))],
-            ["Difference (yearly)", _fmt_m3(float(sc.get("diff", 0)))],
+            ["Difference (anual)", _fmt_m3(float(sc.get("diff", 0)))],
         ],
         colWidths=[2.2 * inch, 3.5 * inch],
     )
@@ -456,8 +456,8 @@ def build_water_demand_report_pdf(data: dict[str, Any], ai_sections: dict[str, s
     story.append(Spacer(1, 0.06 * inch))
     story.append(
         Paragraph(
-            "The higher per-capita scenario (0.1 m³/c) increases total yearly demand versus 0.09 m³/c "
-            "assuming identical parcel populations and land-use mix.",
+            "El escenario de 0,1 m³/persona aumenta la demanda anual frente al de 0,09 m³/persona, "
+            "con los mismos habitantes y usos del predio.",
             body,
         )
     )
@@ -465,14 +465,14 @@ def build_water_demand_report_pdf(data: dict[str, Any], ai_sections: dict[str, s
     story.append(Spacer(1, 0.12 * inch))
 
     # --- Parcel sample ---
-    story.append(Paragraph("7. Parcel register (sample)", h1))
+    story.append(Paragraph("7. Registro de predios (muestra)", h1))
     sample = data.get("parcel_sample") or []
-    pr = [["Parcel ID", "Land use", "Population", "Latitude", "Longitude"]]
+    pr = [["Predio", "Uso", "Habitantes", "Latitud", "Longitud"]]
     for row in sample[:35]:
         pr.append(
             [
                 escape(str(row.get("parcel_id", "")))[:18],
-                str(row.get("land_use", ""))[:14],
+                {"Residential":"Residencial","Commercial":"Comercial","Mixed-use":"Mixto"}.get(row.get("land_use"),str(row.get("land_use", "")))[:14],
                 str(row.get("population", "")),
                 f"{float(row.get('lat', 0)):.5f}",
                 f"{float(row.get('lng', 0)):.5f}",
@@ -497,7 +497,7 @@ def build_water_demand_report_pdf(data: dict[str, Any], ai_sections: dict[str, s
     story.append(Spacer(1, 0.06 * inch))
     story.append(
         Paragraph(
-            f"<i>Showing up to 35 of {data.get('parcel_stats', {}).get('total', 0)} parcels in scope.</i>",
+            f"<i>Se muestran hasta 35 de {data.get('parcel_stats', {}).get('total', 0)} predios incluidos.</i>",
             small,
         )
     )
@@ -505,26 +505,26 @@ def build_water_demand_report_pdf(data: dict[str, Any], ai_sections: dict[str, s
     story.append(Spacer(1, 0.12 * inch))
 
     # --- Limitations ---
-    story.append(Paragraph("8. Data quality, assumptions &amp; limitations", h1))
+    story.append(Paragraph("8. Calidad de datos, supuestos y limitaciones", h1))
     story.append(
         Paragraph(
-            "<b>Model:</b> Estimates are derived from parcel populations, land-use coefficients, and per-capita "
-            "assumptions (0.09 m³/c vs 0.1 m³/c). They do not replace metered consumption or utility billing records.",
+            "<b>Modelo:</b> Las estimaciones se basan en habitantes, coeficientes de uso y dotaciones por persona, "
+            "de 0,09 y 0,1 m³/persona. No sustituyen mediciones ni registros de facturación.",
             body,
         )
     )
     story.append(Spacer(1, 0.08 * inch))
     story.append(
         Paragraph(
-            "<b>Forecast:</b> Growth is applied as a compound annual rate on the neighborhood baseline; "
-            "actual urban demand may differ with policy, infrastructure, climate, and behavior changes.",
+            "<b>Proyección:</b> Se aplica crecimiento anual compuesto a la demanda actual; "
+            "la demanda real puede variar por políticas, infraestructura, clima y comportamiento.",
             body,
         )
     )
     story.append(Spacer(1, 0.08 * inch))
     story.append(
         Paragraph(
-            "<b>Maps:</b> Snippets are static plots from the same coordinates as the web map; basemap tiles are not embedded.",
+            "<b>Mapas:</b> Son gráficos estáticos con las coordenadas del mapa web; no incluyen el mapa base de calles.",
             body,
         )
     )
@@ -532,19 +532,19 @@ def build_water_demand_report_pdf(data: dict[str, Any], ai_sections: dict[str, s
     story.append(PageBreak())
 
     # --- Appendix ---
-    story.append(Paragraph("9. Appendix &amp; report parameters", h1))
+    story.append(Paragraph("9. Anexo y parámetros del informe", h1))
     ps = data.get("parcel_stats") or {}
     by_type = ps.get("by_type") or {}
-    parts = [f"<b>{escape(str(k))}:</b> {int(v)}" for k, v in by_type.items()]
-    line = f"<b>Total parcels:</b> {int(ps.get('total', 0))}"
+    parts = [f"<b>{escape({"Residential":"Residencial","Commercial":"Comercial","Mixed-use":"Mixto"}.get(k,str(k)))}:</b> {int(v)}" for k, v in by_type.items()]
+    line = f"<b>Total de predios:</b> {int(ps.get('total', 0))}"
     if parts:
         line += "<br/>" + " &nbsp;|&nbsp; ".join(parts)
     story.append(Paragraph(line, body))
     story.append(Spacer(1, 0.06 * inch))
     story.append(
         Paragraph(
-            f"<b>Parameters used:</b> scenario {scenario_label}; growth {gr}%/yr; horizon {hy} years; "
-            f"filter {lu}.",
+            f"<b>Parámetros utilizados:</b> escenario {scenario_label}; crecimiento {gr}%/año; horizonte {hy} años; "
+            f"filtro {lu}.",
             body,
         )
     )

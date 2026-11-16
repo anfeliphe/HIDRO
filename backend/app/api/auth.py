@@ -15,7 +15,7 @@ async def register(data: UserCreate, db: AsyncSession = Depends(get_db)):
     q = select(User).where(User.email == data.email)
     r = await db.execute(q)
     if r.scalar_one_or_none():
-        raise HTTPException(status_code=400, detail="Email already registered")
+        raise HTTPException(status_code=400, detail="El correo electrónico ya está registrado")
     user = User(
         email=data.email,
         hashed_password=hash_password(data.password),
@@ -38,7 +38,7 @@ async def login(data: UserLogin, db: AsyncSession = Depends(get_db)):
     r = await db.execute(q)
     user = r.scalar_one_or_none()
     if not user or not verify_password(data.password, user.hashed_password):
-        raise HTTPException(status_code=401, detail="Invalid email or password")
+        raise HTTPException(status_code=401, detail="Correo electrónico o contraseña incorrectos")
     token = create_access_token({"sub": str(user.id), "email": user.email})
     return Token(
         access_token=token,
@@ -55,7 +55,7 @@ async def get_me(
     r = await db.execute(q)
     user = r.scalar_one_or_none()
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404, detail="No se encontró el usuario")
     return UserResponse(id=user.id, email=user.email, name=user.name, organization=user.organization)
 
 
@@ -69,14 +69,14 @@ async def update_profile(
     r = await db.execute(q)
     user = r.scalar_one_or_none()
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404, detail="No se encontró el usuario")
     if data.name is not None:
         user.name = data.name
     if data.organization is not None:
         user.organization = data.organization
     if data.password is not None:
         if len(data.password) < 6:
-            raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
+            raise HTTPException(status_code=400, detail="La contraseña debe tener al menos 6 caracteres")
         user.hashed_password = hash_password(data.password)
     await db.commit()
     await db.refresh(user)

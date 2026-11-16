@@ -89,7 +89,7 @@ const Dashboard = () => {
     <div ref={containerRef} className="h-full flex flex-col lg:flex-row overflow-hidden">
       {parcelsError && (
         <div className="absolute top-14 left-0 right-0 z-50 bg-amber-100 text-amber-900 px-4 py-2 text-sm text-center">
-          Could not load data. Is the backend running? (See README.)
+          No se pudieron cargar los datos. Intenta de nuevo.
         </div>
       )}
       {/* Main Map Section — resizable width on lg */}
@@ -102,32 +102,32 @@ const Dashboard = () => {
       >
         {/* Filter Bar */}
         <div className="bg-white/90 backdrop-blur-md border-b border-gray-200/60 px-4 sm:px-6 py-3 animate-fade-in">
-          <p className="text-xs text-gray-500 mb-2">Select a parcel on the map → Edit → Save. Map and analytics update automatically.</p>
+          <p className="text-xs text-gray-500 mb-2">Selecciona un predio en el mapa → Editar → Guardar. El mapa y los análisis se actualizan automáticamente.</p>
           <div className="flex items-center gap-2 sm:gap-4 flex-wrap lg:flex-nowrap">
             <select
               value={selectedLandUse}
               onChange={(e) => setSelectedLandUse(e.target.value)}
               className="input-field text-xs sm:text-sm flex-1 lg:flex-initial"
             >
-              <option value="All">All Types</option>
-              <option value="Residential">Residential</option>
-              <option value="Commercial">Commercial</option>
-              <option value="Mixed-use">Mixed-use</option>
+              <option value="All">Todos los usos</option>
+              <option value="Residential">Residencial</option>
+              <option value="Commercial">Comercial</option>
+              <option value="Mixed-use">Mixto</option>
             </select>
             <select
               value={scenario}
               onChange={(e) => setScenario(Number(e.target.value))}
               className="input-field text-xs sm:text-sm flex-1 lg:flex-initial"
             >
-              <option value={90}>Baseline (0.09 m³/c)</option>
-              <option value={100}>High estimate (0.1 m³/c)</option>
+              <option value={90}>Base (0,09 m³/persona)</option>
+              <option value={100}>Alta (0,1 m³/persona)</option>
             </select>
             
             <button
               onClick={() => setShowAnalytics(!showAnalytics)}
               className="lg:hidden btn-secondary text-xs flex items-center gap-2 flex-1 lg:flex-initial"
             >
-              {showAnalytics ? 'Show Map' : 'Show Analytics'}
+              {showAnalytics ? "Mostrar mapa" : "Mostrar análisis"}
             </button>
           </div>
         </div>
@@ -136,7 +136,7 @@ const Dashboard = () => {
         <div className="flex-1 relative min-h-[280px] sm:min-h-[300px] min-w-0 overflow-hidden bg-transparent">
           {parcelsLoading && parcels.length === 0 ? (
             <div className="absolute inset-0 z-10 flex items-center justify-center bg-gray-100/80 rounded-xl">
-              <span className="text-gray-600">Loading map…</span>
+              <span className="text-gray-600">Cargando mapa…</span>
             </div>
           ) : null}
           {!(parcelsLoading && parcels.length === 0) ? (
@@ -157,7 +157,7 @@ const Dashboard = () => {
       {!showAnalytics && (
         <div
           role="separator"
-          aria-label="Resize map and analytics panels"
+          aria-label="Ajustar el tamaño del mapa y los análisis"
           onMouseDown={handleResizeStart}
           className="hidden lg:flex flex-shrink-0 w-2 cursor-col-resize bg-gray-200/80 hover:bg-blue-300/60 active:bg-blue-400/80 transition-colors items-center justify-center group"
           style={{ minWidth: RESIZE_HANDLE_WIDTH }}

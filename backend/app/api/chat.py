@@ -26,7 +26,8 @@ from app.services.forecast import project_demand
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
-SYSTEM_PROMPT = """You are the Water Demand Assistant for a single neighborhood dashboard. Explain estimated water demand using ONLY the JSON object that appears right after this text (no other sources).
+SYSTEM_PROMPT = """Responde siempre en español. Eres el Asistente HIDRO. Traduce las etiquetas de los datos a español; conserva identificadores y unidades.
+You are the Water Demand Assistant for a single neighborhood dashboard. Explain estimated water demand using ONLY the JSON object that appears right after this text (no other sources).
 
 Scope (stay on topic):
 - Neighborhood totals: daily, monthly, or yearly demand; parcel count
@@ -50,6 +51,7 @@ Rules:
 
 FINAL_INSTRUCTIONS = """
 ---
+Responde en español.
 Before you reply, verify:
 1. Every volume and **per-parcel population** you cite is consistent with the JSON (`parcels_people`, `scenario_0_09_m3c`, `scenario_0_1_m3c`, `land_use_breakdown`, `population_people`, `consumption_by_parcel_population_threshold`, `forecast_yearly_totals_explanation`, `scenario_difference_yearly_m3`, `forecast_parameters`).
 2. You name scenarios as **0.09 m³/c** (lower) and **0.1 m³/c** (higher), not liters.
@@ -62,7 +64,7 @@ Now answer the user's message below.
 
 def _parse_forecast_intent(text: str) -> tuple[float | None, int | None]:
     """Extract annual growth % and horizon years from the user message when asked explicitly."""
-    t = text.lower()
+    t = text.lower().replace("años", "years").replace("año", "year").replace("crecimiento", "growth").replace("con ", "with ").replace("en ", "in ").replace("del ", "of ")
     growth: float | None = None
     years: int | None = None
 

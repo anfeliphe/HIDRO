@@ -130,7 +130,7 @@ const MapPanel = ({ parcels, scenario, selectedLandUse, onParcelHover, growthRat
       setSaveSuccess(true);
     } catch (err) {
       console.error(err);
-      alert(err.message || 'Failed to save');
+      alert(err.message || "No se pudo guardar");
     } finally {
       setSaveLoading(false);
     }
@@ -142,7 +142,7 @@ const MapPanel = ({ parcels, scenario, selectedLandUse, onParcelHover, growthRat
       {saveSuccess && (
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] flex items-center gap-2 px-4 py-2.5 bg-green-600 text-white text-sm font-medium rounded-lg shadow-lg animate-fade-in-up">
           <CheckCircle size={18} />
-          Parcel updated. Map and analytics refreshed.
+          Predio actualizado. Mapa y análisis actualizados.
         </div>
       )}
       <MapContainer
@@ -199,9 +199,9 @@ const MapPanel = ({ parcels, scenario, selectedLandUse, onParcelHover, growthRat
               <Tooltip direction="top" offset={[0, -8]} opacity={0.95} permanent={false}>
                 <span className="font-semibold">{pid(parcel)}</span>
                 <br />
-                {landUse(parcel)} · Pop. {popPopulation}
+                {landUse(parcel)} · Hab. {popPopulation}
                 <br />
-                Daily {formatM3(popDaily)} · Yearly {formatM3(popYearly)}
+                Diaria {formatM3(popDaily)} · Anual {formatM3(popYearly)}
               </Tooltip>
               {!isMobile && (
                 <Popup className="custom-popup" autoClose={true} closeOnClick={true}>
@@ -209,21 +209,21 @@ const MapPanel = ({ parcels, scenario, selectedLandUse, onParcelHover, growthRat
                     <div className="font-bold text-sm text-gray-900 mb-2">{pid(parcel)}</div>
                     <div className="text-xs text-gray-600 space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium">Land Use:</span>
+                        <span className="font-medium">Uso del predio:</span>
                         <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs font-medium">
                           {landUse(parcel)}
                         </span>
                       </div>
-                      <div><span className="font-medium">Population:</span> {popPopulation}</div>
-                      <div><span className="font-medium">Daily:</span> {formatM3(popDaily)}</div>
-                      <div><span className="font-medium">Yearly:</span> {formatM3(popYearly)}</div>
+                      <div><span className="font-medium">Habitantes:</span> {popPopulation}</div>
+                      <div><span className="font-medium">Diaria:</span> {formatM3(popDaily)}</div>
+                      <div><span className="font-medium">Anual:</span> {formatM3(popYearly)}</div>
                     </div>
                     <button
                       type="button"
                       onClick={() => setEditingParcel(parcel)}
                       className="mt-2 w-full flex items-center justify-center gap-1 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-50 rounded border border-blue-200"
                     >
-                      <Pencil size={12} /> Edit
+                      <Pencil size={12} /> Editar
                     </button>
                   </div>
                 </Popup>
@@ -241,14 +241,14 @@ const MapPanel = ({ parcels, scenario, selectedLandUse, onParcelHover, growthRat
             onClick={() => setGrowthPanelCollapsed((c) => !c)}
             className="w-full flex items-center justify-between gap-2 p-3 text-left hover:bg-gray-50/80 rounded-xl transition-colors"
             aria-expanded={!growthPanelCollapsed}
-            aria-label={growthPanelCollapsed ? 'Show growth projection' : 'Hide growth projection'}
+            aria-label={growthPanelCollapsed ? "Mostrar proyección de crecimiento" : "Ocultar proyección de crecimiento"}
           >
             <div className="flex flex-col gap-0.5 min-w-0">
-              <span className="text-xs font-semibold text-gray-900">Growth projection</span>
+              <span className="text-xs font-semibold text-gray-900">Proyección de crecimiento</span>
               <span className="text-[11px] text-gray-600">
-                {growthRate != null && <span>{growthRate}%/year</span>}
+                {growthRate != null && <span>{growthRate}%/año</span>}
                 {growthRate != null && projectionYears != null && ' · '}
-                {projectionYears != null && <span>{projectionYears} year{projectionYears !== 1 ? 's' : ''}</span>}
+                {projectionYears != null && <span>{projectionYears} año{projectionYears !== 1 ? 's' : ''}</span>}
               </span>
             </div>
             <span className="shrink-0 p-1 rounded text-gray-500 hover:bg-gray-200/60">
@@ -258,15 +258,15 @@ const MapPanel = ({ parcels, scenario, selectedLandUse, onParcelHover, growthRat
           {!growthPanelCollapsed && (
             <div className="px-3 pb-3">
               <div className="text-xs text-gray-600 space-y-1">
-                {growthRate != null && <p><span className="font-medium">Growth:</span> {growthRate}%/year</p>}
-                {projectionYears != null && <p><span className="font-medium">Horizon:</span> {projectionYears} year{projectionYears !== 1 ? 's' : ''}</p>}
+                {growthRate != null && <p><span className="font-medium">Crecimiento:</span> {growthRate}%/año</p>}
+                {projectionYears != null && <p><span className="font-medium">Horizonte:</span> {projectionYears} año{projectionYears !== 1 ? 's' : ''}</p>}
               </div>
-              <p className="text-xs text-gray-500 mt-1">Used for forecast chart (Analytics), not map colors.</p>
+              <p className="text-xs text-gray-500 mt-1">Se aplica a la proyección de Análisis. Los colores del mapa representan la demanda actual.</p>
               <Link
                 to="/analytics"
                 className="mt-2 block text-xs font-medium text-blue-600 hover:text-blue-700 hover:underline"
               >
-                View forecast chart →
+                Ver proyección →
               </Link>
             </div>
           )}
@@ -287,21 +287,21 @@ const MapPanel = ({ parcels, scenario, selectedLandUse, onParcelHover, growthRat
           </div>
           <div className="text-xs text-gray-600 space-y-1">
             <div className="flex items-center gap-2">
-              <span className="font-medium">Land Use:</span>
+              <span className="font-medium">Uso del predio:</span>
               <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs font-medium">
                 {landUse(selectedParcel)}
               </span>
             </div>
-            <div><span className="font-medium">Population:</span> {selectedParcel.population}</div>
-            <div><span className="font-medium">Daily:</span> {formatM3(scenario === 90 ? selectedParcel.daily90 : selectedParcel.daily100)}</div>
-            <div><span className="font-medium">Yearly:</span> {formatM3(scenario === 90 ? selectedParcel.yearly90 : selectedParcel.yearly100)}</div>
+            <div><span className="font-medium">Habitantes:</span> {selectedParcel.population}</div>
+            <div><span className="font-medium">Diaria:</span> {formatM3(scenario === 90 ? selectedParcel.daily90 : selectedParcel.daily100)}</div>
+            <div><span className="font-medium">Anual:</span> {formatM3(scenario === 90 ? selectedParcel.yearly90 : selectedParcel.yearly100)}</div>
           </div>
           <button
             type="button"
             onClick={() => setEditingParcel(selectedParcel)}
             className="mt-2 w-full flex items-center justify-center gap-1 py-2 text-xs font-medium text-blue-600 hover:bg-blue-50 rounded border border-blue-200"
           >
-            <Pencil size={12} /> Edit parcel
+            <Pencil size={12} /> Editar predio
           </button>
         </div>
       )}
@@ -317,11 +317,11 @@ const MapPanel = ({ parcels, scenario, selectedLandUse, onParcelHover, growthRat
           onClick={() => setLegendCollapsed((c) => !c)}
           className="w-full flex items-center justify-between gap-2 p-2.5 sm:p-3 text-left hover:bg-gray-50/80 rounded-xl transition-colors"
           aria-expanded={!legendCollapsed}
-          aria-label={legendCollapsed ? 'Show consumption legend' : 'Hide consumption legend'}
+          aria-label={legendCollapsed ? "Mostrar leyenda de demanda" : "Ocultar leyenda de demanda"}
         >
           <div className="min-w-0">
-            <h3 className="text-xs sm:text-sm font-semibold text-gray-900">Consumption Level</h3>
-            <p className="text-[11px] sm:text-xs text-gray-600 mt-0.5">Daily per parcel ({scenario === 90 ? '0.09' : '0.1'} m³/c)</p>
+            <h3 className="text-xs sm:text-sm font-semibold text-gray-900">Nivel de demanda</h3>
+            <p className="text-[11px] sm:text-xs text-gray-600 mt-0.5">Diaria por predio ({scenario === 90 ? '0.09' : '0.1'} m³/c)</p>
           </div>
           <span className="shrink-0 p-1 rounded text-gray-500 hover:bg-gray-200/60">
             {legendCollapsed ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
@@ -330,13 +330,13 @@ const MapPanel = ({ parcels, scenario, selectedLandUse, onParcelHover, growthRat
         {!legendCollapsed && (
           <>
             <div className="px-2.5 sm:px-3 pb-2">
-              <p className="text-[11px] sm:text-xs text-gray-500 mb-1.5">Daily per parcel ({scenario === 90 ? '0.09' : '0.1'} m³/c)</p>
+              <p className="text-[11px] sm:text-xs text-gray-500 mb-1.5">Diaria por predio ({scenario === 90 ? '0.09' : '0.1'} m³/c)</p>
               <div className="space-y-1">
                 {[
-                  { level: 'Low', threshold: '< 0.5 m³', color: '#93c5fd' },
-                  { level: 'Medium', threshold: '0.5–0.8 m³', color: '#60a5fa' },
-                  { level: 'High', threshold: '0.8–1.1 m³', color: '#3b82f6' },
-                  { level: 'Critical', threshold: '> 1.1 m³', color: '#1e40af' },
+                  { level: "Baja", threshold: '< 0.5 m³', color: '#93c5fd' },
+                  { level: "Media", threshold: '0.5–0.8 m³', color: '#60a5fa' },
+                  { level: "Alta", threshold: '0.8–1.1 m³', color: '#3b82f6' },
+                  { level: "Crítica", threshold: '> 1.1 m³', color: '#1e40af' },
                 ].map((item) => (
                   <div key={item.level} className="flex items-center gap-2">
                     <div 
@@ -389,22 +389,22 @@ function EditParcelModal({ parcel, onClose, onSave, loading }) {
   return (
     <div className="fixed inset-0 z-[1100] flex items-center justify-center p-4 bg-black/50" onClick={onClose}>
       <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 animate-fade-in-up" onClick={(e) => e.stopPropagation()}>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Edit parcel {pid(parcel)}</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Editar predio {pid(parcel)}</h3>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Land use</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Uso del predio</label>
             <select
               value={land_use}
               onChange={(e) => setLandUse(e.target.value)}
               className="input-field w-full"
             >
-              <option value="Residential">Residential</option>
-              <option value="Commercial">Commercial</option>
-              <option value="Mixed-use">Mixed-use</option>
+              <option value="Residential">Residencial</option>
+              <option value="Commercial">Comercial</option>
+              <option value="Mixed-use">Mixto</option>
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Population</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Habitantes</label>
             <input
               type="number"
               min={0}
@@ -416,20 +416,20 @@ function EditParcelModal({ parcel, onClose, onSave, loading }) {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Latitude</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Latitud</label>
               <input type="number" step="any" min={-90} max={90} value={lat} onChange={(e) => setLat(e.target.value)} placeholder="e.g. 4.59" className="input-field w-full" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Longitude</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Longitud</label>
               <input type="number" step="any" min={-180} max={180} value={lng} onChange={(e) => setLng(e.target.value)} placeholder="e.g. -74.21" className="input-field w-full" />
             </div>
           </div>
           <div className="flex gap-2 pt-2">
             <button type="button" onClick={onClose} className="btn-secondary flex-1">
-              Cancel
+              Cancelar
             </button>
             <button type="submit" disabled={loading} className="btn-primary flex-1">
-              {loading ? 'Saving…' : 'Save'}
+              {loading ? "Guardando…" : "Guardar"}
             </button>
           </div>
         </form>

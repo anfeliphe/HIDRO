@@ -51,7 +51,7 @@ const Parcels = () => {
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (err) {
-      alert(err.message || 'Failed to save');
+      alert(err.message || "No se pudo guardar");
     } finally {
       setSaveLoading(false);
     }
@@ -67,7 +67,7 @@ const Parcels = () => {
       setAddSuccess(true);
       setTimeout(() => setAddSuccess(false), 3000);
     } catch (err) {
-      alert(err.message || 'Failed to add parcel');
+      alert(err.message || "No se pudo añadir el predio");
     } finally {
       setSaveLoading(false);
     }
@@ -77,14 +77,14 @@ const Parcels = () => {
     <div className="h-full flex flex-col">
       <div className="px-4 sm:px-6 pt-6 pb-4 bg-white/90 backdrop-blur-md border-b border-gray-200/60 lg:pl-6 pl-16 animate-fade-in">
         <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-4">
-          Parcels
+          Predios
         </h2>
         {error && (
-          <p className="text-sm text-amber-700 mb-2">Could not load parcels. Is the backend running?</p>
+          <p className="text-sm text-amber-700 mb-2">No se pudieron cargar los predios. Intenta de nuevo.</p>
         )}
         {(saveSuccess || addSuccess) && (
           <p className="text-sm text-green-700 mb-2 font-medium">
-            {addSuccess ? 'Parcel added.' : 'Parcel saved.'} Map and analytics will update when you open the Dashboard.
+            {addSuccess ? "Predio añadido." : "Predio guardado."} El mapa y los análisis se actualizarán al abrir Inicio.
           </p>
         )}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
@@ -94,13 +94,13 @@ const Parcels = () => {
             className="btn-primary flex items-center justify-center gap-2 shrink-0"
           >
             <Plus size={18} />
-            Add parcel
+            Añadir predio
           </button>
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search parcel ID..."
+            placeholder="Buscar identificador del predio…"
             className="flex-1 input-field"
           />
           <select
@@ -108,32 +108,32 @@ const Parcels = () => {
             onChange={(e) => { setSelectedType(e.target.value); setCurrentPage(1); }}
             className="input-field sm:w-auto"
           >
-            <option value="All">All Types</option>
-            <option value="Residential">Residential</option>
-            <option value="Commercial">Commercial</option>
-            <option value="Mixed-use">Mixed-use</option>
+            <option value="All">Todos los usos</option>
+            <option value="Residential">Residencial</option>
+            <option value="Commercial">Comercial</option>
+            <option value="Mixed-use">Mixto</option>
           </select>
-          <span className="text-sm text-gray-600">{total} parcels</span>
+          <span className="text-sm text-gray-600">{total} predios</span>
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 sm:p-6">
         {loading && filteredParcels.length === 0 ? (
-          <div className="flex items-center justify-center py-12 text-gray-500">Loading parcels…</div>
+          <div className="flex items-center justify-center py-12 text-gray-500">Cargando predios…</div>
         ) : (
           <div className="bg-white rounded-xl shadow-lg border border-gray-200/60 overflow-hidden opacity-0 animate-fade-in-up" style={{ animationDelay: '80ms', animationFillMode: 'forwards' }}>
             <div className="overflow-x-auto custom-scrollbar">
               <table className="w-full">
                 <thead className="bg-gradient-to-r from-gray-50 to-gray-100/50 border-b border-gray-200">
                   <tr>
-                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Parcel ID</th>
-                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Land Use</th>
-                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider hidden sm:table-cell">Population</th>
-                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider hidden md:table-cell">Daily (0.09 m³/c)</th>
-                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider hidden md:table-cell">Daily (0.1 m³/c)</th>
-                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Yearly (0.09 m³/c)</th>
-                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider hidden lg:table-cell">Yearly (0.1 m³/c)</th>
-                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider w-20">Edit</th>
+                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Identificador del predio</th>
+                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Uso del predio</th>
+                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider hidden sm:table-cell">Habitantes</th>
+                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider hidden md:table-cell">Diaria (0,09 m³/persona)</th>
+                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider hidden md:table-cell">Diaria (0,1 m³/persona)</th>
+                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Anual (0,09 m³/persona)</th>
+                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider hidden lg:table-cell">Anual (0,1 m³/persona)</th>
+                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider w-20">Editar</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -142,7 +142,7 @@ const Parcels = () => {
                       <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm font-medium text-gray-900">{pid(parcel)}</td>
                       <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 py-1 text-xs font-medium rounded-full ${getLandUseColor(landUse(parcel))}`}>
-                          {landUse(parcel)}
+                          {({Residential:'Residencial',Commercial:'Comercial','Mixed-use':'Mixto'})[landUse(parcel)]||landUse(parcel)}
                         </span>
                       </td>
                       <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-700 hidden sm:table-cell">{parcel.population}</td>
@@ -151,7 +151,7 @@ const Parcels = () => {
                       <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-700 font-medium">{formatM3(parcel.yearly90)}</td>
                       <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-700 hidden lg:table-cell">{formatM3(parcel.yearly100)}</td>
                       <td className="px-3 sm:px-6 py-4">
-                        <button type="button" onClick={() => setEditingParcel(parcel)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded" title="Edit"><Pencil size={14} /></button>
+                        <button type="button" onClick={() => setEditingParcel(parcel)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded" title="Editar"><Pencil size={14} /></button>
                       </td>
                     </tr>
                   ))}
@@ -162,12 +162,12 @@ const Parcels = () => {
             {totalPages > 1 && (
               <div className="px-4 sm:px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-3">
                 <div className="text-xs sm:text-sm text-gray-600">
-                  Showing <span className="font-medium">{skip + 1}</span> to <span className="font-medium">{Math.min(skip + itemsPerPage, total)}</span> of <span className="font-medium">{total}</span> parcels
+                  Mostrando <span className="font-medium">{skip + 1}</span> a <span className="font-medium">{Math.min(skip + itemsPerPage, total)}</span> de <span className="font-medium">{total}</span> predios
                 </div>
                 <div className="flex items-center gap-2">
-                  <button onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={currentPage === 1} className="btn-secondary text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed">Previous</button>
-                  <span className="text-xs sm:text-sm text-gray-600 px-2">Page {currentPage} of {totalPages}</span>
-                  <button onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="btn-secondary text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed">Next</button>
+                  <button onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={currentPage === 1} className="btn-secondary text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed">Anterior</button>
+                  <span className="text-xs sm:text-sm text-gray-600 px-2">Página {currentPage} de {totalPages}</span>
+                  <button onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="btn-secondary text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed">Siguiente</button>
                 </div>
               </div>
             )}
@@ -194,52 +194,53 @@ const Parcels = () => {
   );
 };
 
-function EditParcelModal({ parcel, onClose, onSave, loading }) {
+export function EditParcelModal({ parcel, onClose, onSave, loading }) {
   const [land_use, setLandUse] = useState(parcel.land_use ?? parcel.landUse);
   const [population, setPopulation] = useState(parcel.population);
   const [lat, setLat] = useState(parcel.lat != null ? String(parcel.lat) : '');
   const [lng, setLng] = useState(parcel.lng != null ? String(parcel.lng) : '');
 
-  const handleSubmit = (e) => {
+  const [formError,setFormError]=useState('');
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const updates = { land_use, population };
     const latNum = parseFloat(lat);
     const lngNum = parseFloat(lng);
     if (!Number.isNaN(latNum)) updates.lat = latNum;
     if (!Number.isNaN(lngNum)) updates.lng = lngNum;
-    onSave(updates);
+    setFormError('');try{await onSave(updates);}catch(e){setFormError(e.message);}
   };
 
   return (
     <div className="fixed inset-0 z-[1100] flex items-center justify-center p-4 bg-black/50" onClick={onClose}>
       <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 animate-fade-in-up" onClick={(e) => e.stopPropagation()}>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Edit parcel {pid(parcel)}</h3>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Editar predio {pid(parcel)}</h3>
+        <form onSubmit={handleSubmit} className="space-y-4">{formError&&<p role="alert" className="text-sm text-red-700">{formError}</p>}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Land use</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Uso del predio</label>
             <select value={land_use} onChange={(e) => setLandUse(e.target.value)} className="input-field w-full">
-              <option value="Residential">Residential</option>
-              <option value="Commercial">Commercial</option>
-              <option value="Mixed-use">Mixed-use</option>
+              <option value="Residential">Residencial</option>
+              <option value="Commercial">Comercial</option>
+              <option value="Mixed-use">Mixto</option>
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Population</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Habitantes</label>
             <input type="number" min={0} max={1000} value={population} onChange={(e) => setPopulation(Number(e.target.value) || 0)} className="input-field w-full" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Latitude</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Latitud</label>
               <input type="number" step="any" min={-90} max={90} value={lat} onChange={(e) => setLat(e.target.value)} placeholder="4.59" className="input-field w-full" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Longitude</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Longitud</label>
               <input type="number" step="any" min={-180} max={180} value={lng} onChange={(e) => setLng(e.target.value)} placeholder="-74.21" className="input-field w-full" />
             </div>
           </div>
           <div className="flex gap-2 pt-2">
-            <button type="button" onClick={onClose} className="btn-secondary flex-1">Cancel</button>
-            <button type="submit" disabled={loading} className="btn-primary flex-1">{loading ? 'Saving…' : 'Save'}</button>
+            <button type="button" onClick={onClose} className="btn-secondary flex-1">Cancelar</button>
+            <button type="submit" disabled={loading} className="btn-primary flex-1">{loading ? "Guardando…" : "Guardar"}</button>
           </div>
         </form>
       </div>
@@ -247,80 +248,81 @@ function EditParcelModal({ parcel, onClose, onSave, loading }) {
   );
 }
 
-function AddParcelModal({ onClose, onSave, loading }) {
+export function AddParcelModal({ onClose, onSave, loading }) {
   const [parcel_id, setParcelId] = useState('');
   const [land_use, setLandUse] = useState('Residential');
   const [population, setPopulation] = useState(0);
   const [lat, setLat] = useState('');
   const [lng, setLng] = useState('');
 
-  const handleSubmit = (e) => {
+  const [formError,setFormError]=useState('');
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const parcelIdTrimmed = parcel_id.trim();
     if (!parcelIdTrimmed) {
-      alert('Parcel ID is required');
+      alert("El identificador del predio es obligatorio");
       return;
     }
     const latNum = parseFloat(lat);
     const lngNum = parseFloat(lng);
     if (Number.isNaN(latNum) || Number.isNaN(lngNum)) {
-      alert('Valid latitude and longitude are required');
+      alert("Ingresa una latitud y longitud válidas");
       return;
     }
     if (latNum < -90 || latNum > 90 || lngNum < -180 || lngNum > 180) {
-      alert('Latitude must be -90 to 90, longitude -180 to 180');
+      alert("La latitud debe estar entre −90 y 90 y la longitud entre −180 y 180");
       return;
     }
-    onSave({
+    setFormError('');try{await onSave({
       parcel_id: parcelIdTrimmed,
       land_use,
       population: Math.max(0, Math.min(1000, population)),
       lat: latNum,
       lng: lngNum,
-    });
+    });}catch(e){setFormError(e.message);}
   };
 
   return (
     <div className="fixed inset-0 z-[1100] flex items-center justify-center p-4 bg-black/50" onClick={onClose}>
       <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 animate-fade-in-up" onClick={(e) => e.stopPropagation()}>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Add parcel</h3>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Añadir predio</h3>
+        <form onSubmit={handleSubmit} className="space-y-4">{formError&&<p role="alert" className="text-sm text-red-700">{formError}</p>}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Parcel ID</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Identificador del predio</label>
             <input
               type="text"
               value={parcel_id}
               onChange={(e) => setParcelId(e.target.value)}
-              placeholder="e.g. P-0400"
+              placeholder="Ej.: P-0400"
               className="input-field w-full"
               maxLength={32}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Land use</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Uso del predio</label>
             <select value={land_use} onChange={(e) => setLandUse(e.target.value)} className="input-field w-full">
-              <option value="Residential">Residential</option>
-              <option value="Commercial">Commercial</option>
-              <option value="Mixed-use">Mixed-use</option>
+              <option value="Residential">Residencial</option>
+              <option value="Commercial">Comercial</option>
+              <option value="Mixed-use">Mixto</option>
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Population</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Habitantes</label>
             <input type="number" min={0} max={1000} value={population} onChange={(e) => setPopulation(Number(e.target.value) || 0)} className="input-field w-full" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Latitude</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Latitud</label>
               <input type="number" step="any" min={-90} max={90} value={lat} onChange={(e) => setLat(e.target.value)} placeholder="4.59" className="input-field w-full" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Longitude</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Longitud</label>
               <input type="number" step="any" min={-180} max={180} value={lng} onChange={(e) => setLng(e.target.value)} placeholder="-74.21" className="input-field w-full" />
             </div>
           </div>
           <div className="flex gap-2 pt-2">
-            <button type="button" onClick={onClose} className="btn-secondary flex-1">Cancel</button>
-            <button type="submit" disabled={loading} className="btn-primary flex-1">{loading ? 'Adding…' : 'Add parcel'}</button>
+            <button type="button" onClick={onClose} className="btn-secondary flex-1">Cancelar</button>
+            <button type="submit" disabled={loading} className="btn-primary flex-1">{loading ? "Añadiendo…" : "Añadir predio"}</button>
           </div>
         </form>
       </div>

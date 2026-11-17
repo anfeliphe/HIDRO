@@ -4,7 +4,7 @@ import { Plus, Send, Sparkles } from 'lucide-react';
 import * as api from '../api/client';
 import { ChatMarkdown } from '../components/ChatMarkdown';
 
-const CHAT_STORAGE_VERSION = 'v2-integrated';
+const CHAT_STORAGE_VERSION = 'v3-activities';
 const CHAT_MAX_STORED = 100;
 
 function chatStorageKey() {
@@ -97,13 +97,23 @@ const Chat = () => {
   const [messages, setMessages] = useState(loadPersistedMessages);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [images,setImages]=useState([]),[imageLoading,setImageLoading]=useState(false),[attachError,setAttachError]=useState('');
+  const [useWeb,setUseWeb]=useState(true),[caps,setCaps]=useState(null);
+  useEffect(()=>{api.apiFetch('/chat/capabilities').then(c=>{setCaps(c);if(!c.web)setUseWeb(false);}).catch(()=>{setCaps({configured:false,images:false,web:false});setUseWeb(false);});},[]);
+  async function attach(e){
+    const files=Array.from(e.target.files||[]);e.target.value='';setAttachError('');
+    if(images.length+files.length>2){setAttachError('Puedes adjuntar hasta 2 imágenes por mensaje.');return;}
+    if(files.some(f=>!['image/png','image/jpeg','image/webp'].includes(f.type)||f.size>4*1024*1024)){setAttachError('Utiliza PNG, JPEG o WEBP de hasta 4 MB por imagen.');return;}
+    setImageLoading(true);
+    try{const loaded=await Promise.all(files.map(f=>new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve({name:f.name,data:r.result});r.onerror=reject;r.readAsDataURL(f);})));setImages(v=>[...v,...loaded]);}catch{setAttachError('No se pudo leer la imagen.');}finally{setImageLoading(false);}
+  }
   const scrollRef = useRef(null);
 
   const startNewChat = useCallback(() => {
-    if (loading) return;
+    if (loading||imageLoading) return;
     setMessages([]);
-    setInput('');
-  }, [loading]);
+    setInput('');setImages([]);setAttachError('');
+  }, [loading,imageLoading]);
 
   useEffect(() => {
     persistMessages(messages);
@@ -118,17 +128,17 @@ const Chat = () => {
 
   const sendMessage = useCallback(
     async (textOverride) => {
-      if (loading) return;
+      if (loading || imageLoading) return;
       const raw = textOverride !== undefined ? textOverride : input;
-      const text = String(raw).trim();
+      const text = String(raw).trim() || (images.length?'Analiza estas imágenes con la información disponible en HIDRO.':'');
       if (!text) return;
 
-      const userMessage = { type: 'user', text };
+      const userMessage = { type: 'user', text: text+(images.length?'\n\nImágenes adjuntas: '+images.map(i=>i.name).join(', '):'') };
       setMessages((prev) => [...prev, userMessage]);
       setInput('');
       setLoading(true);
 
-      let answer;
+      let answer;let sources=[];
       let usedFallback = false;
       try {
         // Pass short conversation history so follow-up questions can be interpreted consistently.
@@ -139,20 +149,20 @@ const Chat = () => {
         const res = await api.chat(text, {
           growth_rate: growthRate,
           projection_years: projectionYears,
-          history,
+          history, images:images.map(i=>i.data), use_web:useWeb,
         });
+        sources=res.sources||[];setImages([]);
         answer = res.reply || "El asistente no devolvió una respuesta.";
       } catch (err) {
-        usedFallback = true;
-        answer = await getAnswerForQuestion(text, growthRate, projectionYears);
+        if(images.length||useWeb){answer=err.message+' Puedes volver a enviar el mensaje. Para consultar solo los indicadores sin IA, desactiva internet y retira las imágenes.';}else{usedFallback = true;answer = await getAnswerForQuestion(text, growthRate, projectionYears);}
       }
       const fallbackNotice = usedFallback
         ? '*Asistente no disponible. Respuesta calculada con los datos de HIDRO.*\n\n'
         : '';
-      setMessages((prev) => [...prev, { type: 'ai', text: fallbackNotice + answer }]);
+      setMessages((prev) => [...prev, { type: 'ai', text: fallbackNotice + answer, sources }]);
       setLoading(false);
     },
-    [input, growthRate, projectionYears, loading, messages],
+    [input, growthRate, projectionYears, loading, messages, images, imageLoading, useWeb],
   );
 
   const handleSuggestedClick = (question) => {
@@ -238,6 +248,7 @@ const Chat = () => {
                       <p className="mb-1.5 text-xs font-medium text-gray-500">Asistente</p>
                       <div className="rounded-2xl rounded-bl-md border border-gray-100 bg-gray-50/90 px-4 py-3 shadow-sm ring-1 ring-gray-100/80">
                         <ChatMarkdown>{msg.text}</ChatMarkdown>
+                        {msg.sources?.length>0&&<div className="mt-3 border-t pt-2 text-xs"><strong>Fuentes consultadas</strong>{msg.sources.filter(s=>/^https?:\/\//.test(s.url)).map(s=><a className="block text-blue-700 underline" href={s.url} target="_blank" rel="noreferrer" key={s.url}>{s.title||s.url}</a>)}</div>}
                       </div>
                     </div>
                   )}
@@ -257,6 +268,14 @@ const Chat = () => {
       </div>
 
       <div className="shrink-0 border-t border-gray-200/80 bg-white/95 px-4 py-4 backdrop-blur-md sm:px-6">
+        <div className="mx-auto mb-3 max-w-3xl text-xs text-gray-600">
+          <div className="flex flex-wrap items-center gap-4"><label className="cursor-pointer rounded-lg border px-3 py-2">Adjuntar imágenes<input className="sr-only" type="file" accept="image/png,image/jpeg,image/webp" multiple disabled={loading||imageLoading||caps?.images===false} onChange={attach}/></label>
+          <label><input type="checkbox" checked={useWeb} disabled={loading||caps?.web===false} onChange={e=>setUseWeb(e.target.checked)}/> Consultar internet si es necesario</label><span>Prioridad: datos de HIDRO</span></div>
+          {caps?.configured===false&&<p role="status" className="mt-2 text-amber-800">Imágenes e internet requieren configurar el servicio de IA en el servidor.</p>}
+          <p className="mt-2">Al enviar, las imágenes y los datos consultados se procesan con el servicio de IA. Las imágenes no se guardan en el censo ni en el historial; adjúntalas otra vez para revisarlas en otro mensaje.</p>
+          {images.length>0&&<div className="flex gap-3 py-2">{images.map((img,i)=><div key={i}><img src={img.data} alt={img.name} className="h-20 w-24 rounded-lg object-cover"/><button disabled={loading} type="button" onClick={()=>setImages(v=>v.filter((_,j)=>j!==i))}>Quitar {img.name}</button></div>)}</div>}
+          {(attachError||imageLoading)&&<p role="alert">{attachError||'Leyendo imágenes…'}</p>}
+        </div>
         <div className="mx-auto flex max-w-3xl items-end gap-2 rounded-2xl border border-gray-200 bg-gray-50/80 p-1.5 pl-3 shadow-inner ring-1 ring-gray-100 focus-within:border-blue-300 focus-within:ring-blue-100">
           <textarea
             rows={1}
@@ -277,7 +296,7 @@ const Chat = () => {
           <button
             type="button"
             onClick={() => sendMessage()}
-            disabled={loading || !input.trim()}
+            disabled={loading || imageLoading || (!input.trim()&&!images.length)}
             className="mb-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md transition hover:from-blue-700 hover:to-indigo-700 disabled:cursor-not-allowed disabled:opacity-40"
             aria-label="Enviar"
           >

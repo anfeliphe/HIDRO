@@ -1,0 +1,28 @@
+﻿Tipo,Actividad,L/unidad,Unidad,Cantidad inicial,Días/año,m³/día de operación inicial,m³/año inicial,Fuente
+Residencial,Vivienda,90,habitantes,4,365,0.36,131.4,Supuesto provisional HIDRO; requiere calibración local
+Comercial,Tienda / minimercado,60,empleados por día,3,312,0.18,56.16,Supuesto provisional HIDRO; requiere calibración local
+Comercial,Papelería / librería,40,empleados por día,2,312,0.08,24.96,Supuesto provisional HIDRO; requiere calibración local
+Comercial,Ferretería,45,empleados por día,4,312,0.18,56.16,Supuesto provisional HIDRO; requiere calibración local
+Comercial,Oficina / consultorio administrativo,50,empleados por día,10,260,0.5,130.0,Supuesto provisional HIDRO; requiere calibración local
+Comercial,Restaurante,20,comidas por día,60,312,1.2,374.4,Supuesto provisional HIDRO; requiere calibración local
+Comercial,Cafetería / panadería de venta,8,servicios por día,60,312,0.48,149.76,Supuesto provisional HIDRO; requiere calibración local
+Comercial,Peluquería,25,clientes por día,15,312,0.375,117.0,Supuesto provisional HIDRO; requiere calibración local
+Comercial,Lavadero automático sin recirculación,208,vehículos por día,20,312,4.16,1297.92,https://www.epa.gov/system/files/documents/2023-11/ws-commercial-bmp-watersenseatwork_section5.4_vehiclewashes.pdf
+Comercial,Lavandería,15,kg de ropa por día,80,312,1.2,374.4,Supuesto provisional HIDRO; requiere calibración local
+Comercial,Hotel / alojamiento,150,huéspedes por día,20,365,3.0,1095.0,Supuesto provisional HIDRO; requiere calibración local
+Comercial,Gimnasio con duchas,40,usuarios por día,80,312,3.2,998.4,Supuesto provisional HIDRO; requiere calibración local
+Comercial,Otro comercio / actividad sin precisar,50,empleados por día,4,312,0.2,62.4,Supuesto provisional HIDRO; requiere calibración local
+Industrial,Confección sin proceso húmedo,60,trabajadores por día,15,260,0.9,234.0,Supuesto provisional HIDRO; requiere calibración local
+Industrial,Carpintería sin proceso húmedo,60,trabajadores por día,8,260,0.48,124.8,Supuesto provisional HIDRO; requiere calibración local
+Industrial,Taller metalmecánico sin enfriamiento húmedo,70,trabajadores por día,10,260,0.7,182.0,Supuesto provisional HIDRO; requiere calibración local
+Industrial,Procesamiento de alimentos,10,kg procesados por día,200,260,2.0,520.0,Supuesto provisional HIDRO; requiere calibración local
+Industrial,Producción de bebidas,4,litros de producto por día,500,260,2.0,520.0,Supuesto provisional HIDRO; requiere calibración local
+Industrial,Lavado / acabado textil,60,kg procesados por día,100,260,6.0,1560.0,Supuesto provisional HIDRO; requiere calibración local
+Industrial,Otra industria / proceso sin precisar,100,trabajadores por día,10,260,1.0,260.0,Supuesto provisional HIDRO; requiere calibración local
+Oficial,Colegio / institución educativa sin internado,25,estudiantes y personal por día,200,200,5.0,1000.0,Supuesto provisional HIDRO; requiere calibración local
+Oficial,Sede administrativa pública,50,funcionarios por día,30,260,1.5,390.0,Supuesto provisional HIDRO; requiere calibración local
+Oficial,Centro de salud ambulatorio,30,atenciones por día,80,312,2.4,748.8,Supuesto provisional HIDRO; requiere calibración local
+Oficial,Hospital con internación,600,camas ocupadas por día,30,365,18.0,6570.0,Supuesto provisional HIDRO; requiere calibración local
+Oficial,Biblioteca / centro cultural,10,visitantes y personal por día,100,260,1.0,260.0,Supuesto provisional HIDRO; requiere calibración local
+Oficial,Centro deportivo con duchas,40,usuarios por día,100,312,4.0,1248.0,Supuesto provisional HIDRO; requiere calibración local
+Oficial,Otra entidad oficial,50,personas por día,30,260,1.5,390.0,Supuesto provisional HIDRO; requiere calibración local

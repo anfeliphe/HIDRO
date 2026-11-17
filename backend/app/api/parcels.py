@@ -13,7 +13,11 @@ router = APIRouter(prefix="/parcels", tags=["parcels"])
 
 
 def _parcel_to_response(p: Parcel) -> ParcelResponse:
-    c = compute_parcel_consumption(p.population, p.land_use)
+    from app.services.activity_demand import estimate
+    from app.services.hidro_data import USES
+    e=estimate({'clase_uso':USES.get(p.land_use,p.land_use),'numero_habitantes':p.population})
+    c={'daily90':(e['demanda_diaria_90_m3'] or 0)*1000,'daily100':(e['demanda_diaria_100_m3'] or 0)*1000}
+    c.update(yearly90=c['daily90']*365,yearly100=c['daily100']*365)
     return ParcelResponse(
         id=p.id,
         parcel_id=p.parcel_id,
@@ -116,6 +120,8 @@ async def update_parcel(
 async def upload_parcels(
     file: UploadFile = File(...),
     replace_all: bool = False,
+    preview: bool = False,
+    confirmation: str | None = None,
     db: AsyncSession = Depends(get_db),
     _user_id: int = Depends(get_current_user_id),
 ):
@@ -144,9 +150,20 @@ async def upload_parcels(
     if not rows:
         raise HTTPException(status_code=400, detail="El archivo no contiene predios válidos")
 
+    from app.services.hidro_data import unified_records
+    from app.services.data_quality import check_duplicates, review_token
+    visible=await unified_records(db,_user_id)
+    converted=[{'id_predio_demo':r['parcel_id'],**r} for r in rows]
+    try:warnings=check_duplicates(converted,visible)
+    except ValueError as e:raise HTTPException(409,str(e))
+    ids={r['id_predio_demo'] for r in visible}
+    warnings += [f"{r['parcel_id']}: ya existe; se actualizará el registro histórico. Una ficha personalizada seguirá teniendo prioridad." for r in rows if r['parcel_id'] in ids]
+    if replace_all:warnings.append('Se reemplazarán TODOS los predios históricos compartidos. Las fichas de caracterización se conservan.')
+    token=review_token([{'replace_all':replace_all},*converted],visible)
+    if preview:return {'warnings':warnings,'review_token':token,'total':len(rows)}
+    if warnings and confirmation!=token:raise HTTPException(409,'Revisa la vista previa y confirma las coincidencias antes de importar.')
     if replace_all:
         await db.execute(Parcel.__table__.delete())
-        await db.commit()
 
     inserted = 0
     updated = 0

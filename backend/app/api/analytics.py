@@ -1,3 +1,4 @@
+from app.services.hidro_data import daily_for, yearly_for
 from app.services.hidro_data import demand_parcels
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -35,7 +36,7 @@ async def get_summary(
     """Total neighborhood demand: daily, monthly, yearly, population. scenario=90 or 100 (L/capita). Optional land_use filter (Residential, Commercial, Mixed-use)."""
     parcels = await demand_parcels(db, _user_id, land_use)
     l_per_capita = L_PER_CAPITA_100 if scenario == 100 else L_PER_CAPITA_90
-    total_daily = sum(parcel_daily_consumption(p.population, l_per_capita, p.land_use) for p in parcels)
+    total_daily = sum(daily_for(p, l_per_capita) for p in parcels)
     total_pop = sum(p.population for p in parcels)
     return SummaryMetrics(
         daily=total_daily,
@@ -55,8 +56,8 @@ async def get_land_use_breakdown(
     parcels = await demand_parcels(db, _user_id, land_use)
     breakdown = {"Residential": {"count": 0, "consumption": 0}, "Commercial": {"count": 0, "consumption": 0}, "Mixed-use": {"count": 0, "consumption": 0}}
     for p in parcels:
-        breakdown[p.land_use]["count"] += 1
-        breakdown[p.land_use]["consumption"] += parcel_yearly_consumption(p.population, L_PER_CAPITA_90, p.land_use)
+        breakdown.setdefault(p.land_use, {"count":0,"consumption":0})["count"] += 1
+        breakdown[p.land_use]["consumption"] += yearly_for(p, L_PER_CAPITA_90)
     total = sum(b["consumption"] for b in breakdown.values())
     items = [
         LandUseBreakdownItem(
@@ -81,8 +82,8 @@ async def get_forecast(
     """Demand projection. growth_rate in %, years 1-20. Optional land_use filter."""
     years = max(1, min(20, years))
     parcels = await demand_parcels(db, _user_id, land_use)
-    base90 = sum(parcel_yearly_consumption(p.population, L_PER_CAPITA_90, p.land_use) for p in parcels)
-    base100 = sum(parcel_yearly_consumption(p.population, L_PER_CAPITA_100, p.land_use) for p in parcels)
+    base90 = sum(yearly_for(p, L_PER_CAPITA_90) for p in parcels)
+    base100 = sum(yearly_for(p, L_PER_CAPITA_100) for p in parcels)
     data = project_demand(base90, base100, growth_rate, years)
     return ForecastResponse(data=[ForecastYear(**d) for d in data])
 
@@ -94,8 +95,8 @@ async def get_scenario_comparison(
 ):
     """Scenario comparison: 0.09 m³/c vs 0.1 m³/c yearly demand (liters)."""
     parcels = await demand_parcels(db, _user_id)
-    y90 = sum(parcel_yearly_consumption(p.population, L_PER_CAPITA_90, p.land_use) for p in parcels)
-    y100 = sum(parcel_yearly_consumption(p.population, L_PER_CAPITA_100, p.land_use) for p in parcels)
+    y90 = sum(yearly_for(p, L_PER_CAPITA_90) for p in parcels)
+    y100 = sum(yearly_for(p, L_PER_CAPITA_100) for p in parcels)
     return ScenarioComparison(
         comparison=[
             ScenarioComparisonItem(name="0.09 m³/c", value=y90),

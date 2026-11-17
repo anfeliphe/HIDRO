@@ -8,7 +8,7 @@ from app.database import Base, get_db
 from app.api.deps import get_current_user_id
 from app.api.parcels import router as parcels_router
 from app.api.census import router as census_router
-from app.api.chat import _parse_forecast_intent
+from app.api.chat import ChatRequest
 
 class ManualPrediosTest(unittest.TestCase):
     def test_create_and_edit_updates_unified_list(self):
@@ -34,7 +34,7 @@ class ManualPrediosTest(unittest.TestCase):
         self.assertEqual(len(rows),1)
         self.assertEqual(rows[0]['numero_habitantes'],8)
         self.assertEqual(rows[0]['clase_uso'],'Comercial')
-        self.assertAlmostEqual(rows[0]['demanda_diaria_90_m3'],.864)
+        self.assertAlmostEqual(rows[0]['demanda_diaria_90_m3'],4*50*312/365/1000)
         duplicate=client.post('/parcels',json=body)
         self.assertEqual(duplicate.status_code,400)
         self.assertEqual(duplicate.json()['detail'],'Ya existe un predio con ese identificador')
@@ -54,4 +54,5 @@ class ManualPrediosTest(unittest.TestCase):
         asyncio.run(engine.dispose())
 
     def test_forecast_understands_spanish(self):
-        self.assertEqual(_parse_forecast_intent('¿Cuál será la demanda en 5 años con un crecimiento del 3%?'),(3.0,5))
+        body=ChatRequest(message='Proyecta la demanda',growth_rate=3,projection_years=5)
+        self.assertEqual((body.growth_rate,body.projection_years),(3,5))

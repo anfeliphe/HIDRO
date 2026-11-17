@@ -177,7 +177,7 @@ def build_water_demand_report_pdf(data: dict[str, Any], ai_sections: dict[str, s
     )
     gen = data.get("generated_at") or datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     scenario_label = escape(str(data.get("scenario_label", "")))
-    lu = escape({"All":"Todos","Residential":"Residencial","Commercial":"Comercial","Mixed-use":"Mixto"}.get(str(data.get("land_use_filter")),str(data.get("land_use_filter", "Todos"))))
+    lu = escape({"All":"Todos","Residential":"Residencial","Commercial":"Comercial","Mixed-use":"Mixto","Industrial":"Industrial","Official":"Oficial","Multiuser":"Multiusuario"}.get(str(data.get("land_use_filter")),str(data.get("land_use_filter", "Todos"))))
     gr = data.get("growth_rate", 2)
     hy = data.get("horizon_years", 5)
     meta = (
@@ -294,7 +294,7 @@ def build_water_demand_report_pdf(data: dict[str, Any], ai_sections: dict[str, s
     # --- Land use ---
     breakdown = data.get("breakdown") or []
     sizes = [float(b.get("consumption", 0) or 0) for b in breakdown]
-    labels = [{"Residential":"Residencial","Commercial":"Comercial","Mixed-use":"Mixto"}.get(b.get("type"),str(b.get("type", ""))) for b in breakdown]
+    labels = [{"Residential":"Residencial","Commercial":"Comercial","Mixed-use":"Mixto","Industrial":"Industrial","Official":"Oficial","Multiuser":"Multiusuario"}.get(b.get("type"),str(b.get("type", ""))) for b in breakdown]
     pie_colors = ["#3b82f6", "#14b8a6", "#f59e0b"]
 
     story.append(Paragraph("3. Distribución por uso y demanda", h1))
@@ -302,7 +302,7 @@ def build_water_demand_report_pdf(data: dict[str, Any], ai_sections: dict[str, s
     for b in breakdown:
         rows.append(
             [
-                {"Residential":"Residencial","Commercial":"Comercial","Mixed-use":"Mixto"}.get(b.get("type"),str(b.get("type", ""))),
+                {"Residential":"Residencial","Commercial":"Comercial","Mixed-use":"Mixto","Industrial":"Industrial","Official":"Oficial","Multiuser":"Multiusuario"}.get(b.get("type"),str(b.get("type", ""))),
                 str(b.get("count", "")),
                 f"{b.get('percentage', '0')}%",
                 _fmt_m3(float(b.get("consumption", 0))),
@@ -472,7 +472,7 @@ def build_water_demand_report_pdf(data: dict[str, Any], ai_sections: dict[str, s
         pr.append(
             [
                 escape(str(row.get("parcel_id", "")))[:18],
-                {"Residential":"Residencial","Commercial":"Comercial","Mixed-use":"Mixto"}.get(row.get("land_use"),str(row.get("land_use", "")))[:14],
+                {"Residential":"Residencial","Commercial":"Comercial","Mixed-use":"Mixto","Industrial":"Industrial","Official":"Oficial","Multiuser":"Multiusuario"}.get(row.get("land_use"),str(row.get("land_use", "")))[:14],
                 str(row.get("population", "")),
                 f"{float(row.get('lat', 0)):.5f}",
                 f"{float(row.get('lng', 0)):.5f}",
@@ -508,8 +508,8 @@ def build_water_demand_report_pdf(data: dict[str, Any], ai_sections: dict[str, s
     story.append(Paragraph("8. Calidad de datos, supuestos y limitaciones", h1))
     story.append(
         Paragraph(
-            "<b>Modelo:</b> Las estimaciones se basan en habitantes, coeficientes de uso y dotaciones por persona, "
-            "de 0,09 y 0,1 m³/persona. No sustituyen mediciones ni registros de facturación.",
+            "<b>Modelo:</b> Vivienda: habitantes por dotación. Otros usos: cantidad por litros/unidad por días de operación. "
+            "Solo la parte residencial cambia entre 0,09 y 0,1 m³/persona/día. El promedio diario es el volumen anual dividido entre 365. Incluye perfiles provisionales: revise las fichas. No sustituye mediciones ni facturación.",
             body,
         )
     )
@@ -535,7 +535,7 @@ def build_water_demand_report_pdf(data: dict[str, Any], ai_sections: dict[str, s
     story.append(Paragraph("9. Anexo y parámetros del informe", h1))
     ps = data.get("parcel_stats") or {}
     by_type = ps.get("by_type") or {}
-    parts = [f"<b>{escape({"Residential":"Residencial","Commercial":"Comercial","Mixed-use":"Mixto"}.get(k,str(k)))}:</b> {int(v)}" for k, v in by_type.items()]
+    parts = [f"<b>{escape({"Residential":"Residencial","Commercial":"Comercial","Mixed-use":"Mixto","Industrial":"Industrial","Official":"Oficial","Multiuser":"Multiusuario"}.get(k,str(k)))}:</b> {int(v)}" for k, v in by_type.items()]
     line = f"<b>Total de predios:</b> {int(ps.get('total', 0))}"
     if parts:
         line += "<br/>" + " &nbsp;|&nbsp; ".join(parts)

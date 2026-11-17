@@ -1,0 +1,64 @@
+HIDRO — Consumos por actividad, asistente e integridad de datos
+17 de noviembre de 2026
+
+INSTALACIÓN
+1. Conserva el respaldo de tu base de datos.
+2. Descomprime el ZIP. Entra a la carpeta que contiene src y backend.
+3. Sube src y backend a la raíz de anfeliphe/HIDRO, reemplazando los archivos. No subas la carpeta exterior.
+4. Incluye backend/requirements.txt: incorpora el cliente de IA actualizado y el validador de imágenes.
+5. Espera que WebGIS (servidor) y WebGIS-2 (página) terminen sus despliegues. Recarga con Ctrl+Shift+R.
+No se borran predios ni se requiere recargar el CSV. Los nuevos componentes se guardan en el JSON de la ficha existente, sin modificar columnas de PostgreSQL.
+Este paquete actualiza la versión HIDRO_formulario_completo_predios. No es una copia completa del repositorio.
+
+ESTIMACIONES
+El catálogo puede consultarse en Añadir/Editar predio > Estimación por actividad. También se adjunta en CSV y Markdown.
+Vivienda: habitantes × 90 o 100 L/persona/día.
+Otras actividades: cantidad diaria × litros por unidad × días de operación al año.
+Demanda anual en m³ = litros anuales / 1000.
+Promedio diario anual = anual / 365. Mes convencional = promedio diario × 30.
+Mixto, Multiusuario y Multiuso: suman sus actividades; no se añade automáticamente otra vez la población general de la ficha.
+Solo la parte residencial cambia entre los escenarios. Los consumos de actividades se mantienen iguales en ambos.
+Los perfiles sin detalle usan cantidades provisionales claramente indicadas; edítalas antes de usar los resultados para decisiones. La composición inicial mixta supone una vivienda (4 habitantes si no están informados) y comercio general; debe reemplazarse por el inventario real.
+Los coeficientes históricos comercial 1,2 y mixto 1,1 se sustituyen por actividades: los totales anteriores cambiarán aunque no vuelvas a importar.
+Los factores son hipótesis de planificación para operaciones pequeñas, NO normas EAAB ni consumos medidos. Los factores de industria dependen mucho del proceso; industria general es solo un perfil provisional, no un diseño hidráulico. Contrasta con facturas o mediciones y ajusta litros/unidad.
+El factor de lavadero corresponde específicamente a un sistema automático sin recirculación; no es universal para todos los lavaderos. Fuentes y límites: CATALOGO_CONSUMOS.md.
+Los factores estiman el conjunto de la actividad, incluidos auxiliares ordinarios. No sumes nuevamente al mismo personal. Para instalaciones con varios procesos, define componentes no superpuestos y calibra con medición.
+Tener o no agua de red describe disponibilidad; no reduce automáticamente la demanda potencial estimada.
+
+CSV
+El modelo de 26 columnas sigue funcionando. Admite una columna opcional componentes_consumo con un arreglo JSON (debidamente entrecomillado según CSV), por ejemplo:
+[{"actividad":"lavadero","cantidad":20,"litros_unidad":208,"dias_ano":312}]
+En una actualización sin esa columna se conserva la configuración de actividades existente. Cambiar a un uso incompatible exige revisarla.
+Exportar vista incluye la columna. El formato antiguo de 5 columnas conserva sus límites y no contiene actividades: completa esas fichas desde Editar.
+
+DUPLICADOS Y ERRORES
+Se bloquean identificadores repetidos dentro de archivos, incluidas variaciones de mayúsculas/espacios, y se avisan colisiones con identificadores existentes.
+Una dirección normalizada con el mismo municipio o coordenadas coincidentes a 5 decimales produce un aviso de posible duplicado, no una fusión automática. Unidades diferentes pueden compartir ubicación.
+Crear/editar pide revisión antes de guardar posibles coincidencias. Importar muestra avisos y actualizaciones antes de confirmar. Si cambian los datos entre la revisión y el guardado, exige revisar de nuevo.
+Validaciones: coordenadas, cantidades negativas/no finitas, días de operación, categorías incompatibles, horas de servicio, sumas de unidades y habitantes/familias. El error indica campo o fila.
+Las coincidencias se revisan sobre los predios compartidos y los propios del usuario; no se exponen fichas privadas de otras cuentas.
+
+ACTIVACIÓN DEL CHAT EN RENDER
+En WebGIS > Environment:
+OPENAI_API_KEY = clave de tu proyecto de API. Si ya existe una válida, consérvala.
+OPENAI_CHAT_MODEL = gpt-4.1-mini (predeterminado; debe admitir Responses, imágenes, funciones y búsqueda web).
+CHAT_WEB_ENABLED = true (predeterminado). Usa false si deseas deshabilitar internet en el servidor.
+No subas claves a GitHub ni las compartas en el chat. Revisa que la API tenga cuota y acceso al modelo y a sus herramientas. Las llamadas de IA y búsqueda pueden generar cargos del proveedor.
+La clave se usa solo en el servidor. No se añade a la página.
+
+CHAT: ALCANCE
+- Consulta todas las fichas autorizadas del usuario; no se limita a las primeras 50.
+- Resúmenes y agrupaciones calculados sobre todas las coincidencias; fichas paginadas de 40 en 40.
+- Prioridad a HIDRO, luego imágenes y después fuentes públicas. Enlaces de fuentes web consultadas.
+- Consultas de fichas, suministro, actividades, errores, totales y proyecciones. No modifica registros.
+- Hasta 2 imágenes PNG/JPEG/WEBP estáticas por mensaje, de máximo 4 MB y 20 megapíxeles cada una.
+- Las imágenes se procesan al enviar y no se guardan en el censo ni en el historial local. Reenvíalas para analizarlas otra vez. El historial conserva texto, nombres de adjuntos y fuentes.
+- Las imágenes y los datos relevantes se envían al servicio de IA para procesar la respuesta. El cliente solicita store=false para las respuestas; esto no equivale a prometer retención cero por el proveedor.
+- Los filtros de pantalla no limitan el chat. Las consultas se limitan por permisos de usuario.
+- Accede a fichas importadas, no a archivos originales que HIDRO no conserve ni a archivos de otras aplicaciones.
+- Sin API disponible, el modo local responde preguntas sencillas de indicadores; no analiza imágenes ni navega. La interfaz informa la limitación.
+
+VERIFICACIÓN
+Compilación de producción correcta. 22 pruebas automatizadas correctas: cálculos, escenarios, API, informe PDF, aislamiento, duplicados, importación, imágenes inválidas y consultas del asistente con proveedor simulado.
+No se realizó una llamada real facturable al proveedor de IA ni se modificó Render. Falta verificar imágenes y búsqueda con tu configuración real.
+No fue posible abrir el navegador de pruebas en este entorno; queda pendiente revisar visualmente el formulario y el chat tras desplegar.

@@ -2,6 +2,9 @@
 import csv
 import io
 import math
+import json
+from app.services.activity_demand import CATALOG, validate_components
+from app.services.data_quality import check_duplicates, review_token, key
 from datetime import date
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, constr
@@ -40,10 +43,10 @@ def parse_census(content):
             for k in ['id_predio_demo','id_usuario','fecha_censo','barrio','municipio','clase_uso','lat','lng']:
                 if not r[k]: raise ValueError(f'{k} es obligatorio.')
             if len(r['id_predio_demo'])>100: raise ValueError('Identificador demasiado largo.')
-            if r['id_predio_demo'] in seen: raise ValueError('Predio duplicado en el archivo.')
-            seen.add(r['id_predio_demo'])
+            if key(r['id_predio_demo']) in seen: raise ValueError('Predio duplicado en el archivo.')
+            seen.add(key(r['id_predio_demo']))
             date.fromisoformat(r['fecha_censo'])
-            if r['clase_uso'] not in ['Residencial','Comercial','Industrial','Oficial','Multiusuario']: raise ValueError('Clase de uso no reconocida.')
+            if r['clase_uso'] not in ['Residencial','Comercial','Mixto','Industrial','Oficial','Multiusuario','Multiuso']: raise ValueError('Clase de uso no reconocida.')
             for k,limit in NUMBERS.items():
                 r[k] = float(r[k]) if r[k] else None
                 if r[k] is not None and (not math.isfinite(r[k]) or not 0<=r[k]<=limit or (k!='horas_servicio' and not r[k].is_integer())): raise ValueError(f'{k} fuera de rango o no válido.')
@@ -58,6 +61,9 @@ def parse_census(content):
             if r['numero_habitantes'] is not None and r['numero_familias'] is not None and r['numero_habitantes']<r['numero_familias']: raise ValueError('Habitantes menores que familias.')
             a,b,t=(r[k] for k in ['unidades_habitacionales','unidades_no_habitacionales','total_unidades'])
             if all(v is not None for v in (a,b,t)) and a+b!=t: raise ValueError('El total de unidades no coincide.')
+            if raw.get('componentes_consumo'):
+                try: r['componentes_consumo']=validate_components(json.loads(raw['componentes_consumo']),r['clase_uso'])
+                except (ValueError,TypeError) as e: raise ValueError(f'componentes_consumo: {e}')
             rows.append(r)
             if len(rows)>5000: raise ValueError('Máximo 5000 predios por archivo.')
         except (ValueError,TypeError) as e:
@@ -68,6 +74,7 @@ def parse_census(content):
 class ImportBody(BaseModel):
     content: constr(max_length=2_000_000)
     preview: bool = True
+    review_token: str | None = None
 
 @router.get('/unified')
 async def unified_census(db:AsyncSession=Depends(get_db), uid:int=Depends(get_current_user_id)):
@@ -84,14 +91,30 @@ async def import_census(body:ImportBody, db:AsyncSession=Depends(get_db), uid:in
     try: rows=parse_census(body.content)
     except (ValueError,IndexError,csv.Error) as e: raise HTTPException(400,str(e))
     existing={r.external_id:r for r in (await db.execute(select(CensusRecord).where(CensusRecord.owner_id==uid))).scalars()}
+    from app.services.hidro_data import unified_records
+    visible=await unified_records(db,uid)
+    try:warnings=check_duplicates(rows,visible)
+    except ValueError as e:raise HTTPException(409,str(e))
     updated=sum(r['id_predio_demo'] in existing for r in rows)
+    historical={r['id_predio_demo'] for r in visible if r['origen']=='HIDRO existente'}
+    for r in rows:
+        if r['id_predio_demo'] in existing or r['id_predio_demo'] in historical:
+            warnings.append(f"{r['id_predio_demo']}: reemplazará tu ficha o tendrá prioridad sobre el registro histórico.")
+        if r['id_predio_demo'] in existing and 'componentes_consumo' not in r:
+            r['componentes_consumo']=existing[r['id_predio_demo']].payload.get('componentes_consumo')
+            if r['componentes_consumo']:
+                try:validate_components(r['componentes_consumo'],r['clase_uso'])
+                except ValueError:raise HTTPException(400,f"{r['id_predio_demo']}: el cambio de uso requiere revisar las actividades de consumo.")
+    token=review_token(rows,visible)
+    if not body.preview and warnings and body.review_token!=token:
+        raise HTTPException(409,'Hay coincidencias o actualizaciones. Revisa la vista previa y confirma de nuevo.')
     if not body.preview:
         for r in rows:
             key=r['id_predio_demo']
             if key in existing: existing[key].payload=r
             else: db.add(CensusRecord(owner_id=uid,external_id=key,payload=r))
         await db.commit()
-    return {'total':len(rows),'inserted':len(rows)-updated,'updated':updated,'simulated':sum(r['dato_simulado'] for r in rows),'preview':body.preview}
+    return {'total':len(rows),'inserted':len(rows)-updated,'updated':updated,'simulated':sum(r['dato_simulado'] for r in rows),'preview':body.preview,'warnings':warnings,'review_token':token}
 
 
 @router.delete('/records/{external_id}')
@@ -109,6 +132,8 @@ async def delete_census_record(external_id: str, db: AsyncSession = Depends(get_
 
 class ManualRecordBody(BaseModel):
     record: dict
+    preview: bool = False
+    review_token: str | None = None
 
 
 def validate_manual_record(raw):
@@ -122,7 +147,7 @@ def validate_manual_record(raw):
         if r[key] and len(r[key])>500:raise ValueError(f'{key}: máximo 500 caracteres.')
     if not r['id_predio_demo'] or len(r['id_predio_demo'])>100:
         raise ValueError('El identificador es obligatorio y admite hasta 100 caracteres.')
-    if r['clase_uso'] not in ['Residencial','Comercial','Mixto','Industrial','Oficial','Multiusuario']:
+    if r['clase_uso'] not in ['Residencial','Comercial','Mixto','Industrial','Oficial','Multiusuario','Multiuso']:
         raise ValueError('Selecciona un uso del predio válido.')
     if r['fecha_censo']:
         try:date.fromisoformat(r['fecha_censo'])
@@ -152,6 +177,7 @@ def validate_manual_record(raw):
     if all(v is not None for v in (a,b,t)) and a+b!=t:raise ValueError('El total de unidades debe ser la suma de las unidades de vivienda y no residenciales.')
     if r['numero_habitantes'] is not None and r['numero_familias'] is not None and r['numero_habitantes']<r['numero_familias']:
         raise ValueError('El número de habitantes no puede ser menor que el de familias.')
+    r['componentes_consumo']=validate_components(raw.get('componentes_consumo'),r['clase_uso'])
     return r
 
 async def save_manual_record(body,db,uid,external_id=None):
@@ -165,6 +191,13 @@ async def save_manual_record(body,db,uid,external_id=None):
     legacy=(await db.execute(select(Parcel).where(Parcel.parcel_id==key))).scalar_one_or_none()
     if external_id is None and (current is not None or legacy is not None):raise HTTPException(409,'Ya existe un predio con ese identificador. Utiliza Editar.')
     if external_id is not None and current is None and legacy is None:raise HTTPException(404,'No se encontró el predio para editar.')
+    from app.services.hidro_data import unified_records
+    visible=await unified_records(db,uid)
+    try:warnings=check_duplicates([r],visible)
+    except ValueError as e:raise HTTPException(409,str(e))
+    token=review_token([r],visible)
+    if body.preview:return {'warnings':warnings,'review_token':token}
+    if warnings and body.review_token!=token:raise HTTPException(409,'Posibles duplicados: revisa las coincidencias y confirma antes de guardar.')
     # Server-owned metadata keeps historical demand coefficients without exposing them as editable inputs.
     r['_manual']=True
     r['_historic_coefficients']=bool(current.payload.get('_historic_coefficients')) if current is not None else legacy is not None
@@ -183,3 +216,7 @@ async def create_manual_record(body:ManualRecordBody,db:AsyncSession=Depends(get
 @router.put('/records/{external_id}')
 async def update_manual_record(external_id:str,body:ManualRecordBody,db:AsyncSession=Depends(get_db),uid:int=Depends(get_current_user_id)):
     return await save_manual_record(body,db,uid,external_id)
+
+@router.get('/activity-catalog')
+async def activity_catalog(uid:int=Depends(get_current_user_id)):
+    return list(CATALOG.values())

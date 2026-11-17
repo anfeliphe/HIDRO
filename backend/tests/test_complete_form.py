@@ -41,7 +41,7 @@ class CompleteFormTest(unittest.TestCase):
         old['direccion']='Dirección completada'
         self.assertEqual(c.put('/census/records/OLD',json={'record':old}).status_code,200)
         saved=next(r for r in c.get('/census/unified').json() if r['id_predio_demo']=='OLD')
-        self.assertAlmostEqual(saved['demanda_diaria_90_m3'],.432)
+        self.assertAlmostEqual(saved['demanda_diaria_90_m3'],4*50*312/365/1000)
         self.assertIsNone(saved['tiene_agua'])
         from pathlib import Path
         content=(Path(__file__).parents[2]/'public/HIDRO_modelo_propuesto_DEMO.csv').read_text()

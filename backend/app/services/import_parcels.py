@@ -4,6 +4,8 @@ Expected fields: parcel_id, land_use, population, lat, lng.
 land_use must be one of: Residential, Commercial, Mixed-use.
 """
 import csv
+import math
+from app.services.data_quality import key
 import json
 from io import StringIO
 from typing import Any
@@ -69,7 +71,9 @@ def _row_to_parcel(row: dict[str, Any]) -> dict[str, Any]:
     if pop is None:
         pop = row.get("pop")
     try:
-        population = int(float(pop)) if pop is not None else 0
+        population = float(pop) if pop is not None else 0
+        if not math.isfinite(population) or not population.is_integer():raise ValueError()
+        population=int(population)
     except (TypeError, ValueError):
         raise ValueError(f"El número de habitantes debe ser numérico; se recibió {pop!r}")
     if population < 0 or population > 10000:
@@ -83,8 +87,9 @@ def _row_to_parcel(row: dict[str, Any]) -> dict[str, Any]:
         raise ValueError(f"La latitud debe estar entre −90 y 90; se recibió {lat}")
     if not (-180 <= lng <= 180):
         raise ValueError(f"La longitud debe estar entre −180 y 180; se recibió {lng}")
+    if len(pid)>32:raise ValueError("El identificador admite máximo 32 caracteres en el formato anterior; no se recortará.")
     return {
-        "parcel_id": pid[:32],
+        "parcel_id": pid,
         "land_use": land_use,
         "population": population,
         "lat": lat,
@@ -95,12 +100,14 @@ def _row_to_parcel(row: dict[str, Any]) -> dict[str, Any]:
 def parse_csv(content: str) -> list[dict[str, Any]]:
     """Parse CSV string. First row = headers. Columns: parcel_id, land_use, population, lat, lng (names case-insensitive)."""
     reader = csv.DictReader(StringIO(content))
+    if reader.fieldnames and len(reader.fieldnames)!=len(set(reader.fieldnames)):raise ValueError("Encabezados duplicados.")
     rows = list(reader)
     if not rows:
         return []
     # Normalize header keys to lowercase for lookup
     normalized = []
     for row in rows:
+        if None in row:raise ValueError("Hay columnas adicionales sin encabezado.")
         d = {k.strip().lower().replace(" ", "_"): v for k, v in row.items()}
         # Map common column names
         if "parcel_id" not in d and "id" in d:
@@ -129,7 +136,14 @@ def parse_csv(content: str) -> list[dict[str, Any]]:
         if "lng" not in d and "lon" in d:
             d["lng"] = d["lon"]
         normalized.append(d)
-    return [_row_to_parcel(r) for r in normalized]
+    result=[];seen=set()
+    for line,r in enumerate(normalized,2):
+        try:
+            parsed=_row_to_parcel(r);identity=key(parsed['parcel_id'])
+            if identity in seen:raise ValueError('Identificador duplicado en el archivo.')
+            seen.add(identity);result.append(parsed)
+        except ValueError as e:raise ValueError(f'Fila {line}: {e}')
+    return result
 
 
 def parse_json(content: str) -> list[dict[str, Any]]:
@@ -161,4 +175,9 @@ def parse_json(content: str) -> list[dict[str, Any]]:
             parcels.append(_row_to_parcel(props))
     else:
         raise ValueError("El JSON debe contener una lista de predios o una colección GeoJSON (FeatureCollection)")
+    seen=set()
+    for i,p in enumerate(parcels,1):
+        identity=key(p['parcel_id'])
+        if identity in seen:raise ValueError(f'Registro {i}: identificador duplicado.')
+        seen.add(identity)
     return parcels

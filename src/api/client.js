@@ -111,9 +111,9 @@ export async function updateParcel(parcelId, body) {
  * Upload a parcel dataset file (CSV, JSON, or GeoJSON).
  * replaceAll: if true, replace all existing parcels; else merge/upsert by parcel_id.
  */
-export async function uploadParcelDataset(file, replaceAll = false) {
+export async function uploadParcelDataset(file, replaceAll = false, preview = false, confirmation = null) {
   const base = API_BASE.replace(/\/+$/, "");
-  const url = `${base}/parcels/upload?replace_all=${replaceAll}`;
+  const url = `${base}/parcels/upload?replace_all=${replaceAll}&preview=${preview}${confirmation?`&confirmation=${encodeURIComponent(confirmation)}`:""}`;
   const form = new FormData();
   form.append("file", file);
   const token = getToken();
@@ -209,7 +209,7 @@ export async function downloadPdfReport({
  * Pass growth_rate / projection_years so the model uses the same forecast as the dashboard.
  */
 export async function chat(message, options = {}) {
-  const payload = { message: String(message).trim() };
+  const payload = { message: String(message).trim(), images: options.images || [], use_web: options.use_web ?? true };
   if (options.growth_rate != null && options.growth_rate !== "") {
     payload.growth_rate = Number(options.growth_rate);
   }

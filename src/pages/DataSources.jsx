@@ -63,7 +63,9 @@ const DataSources = () => {
     setUploadError(null);
     setUploadResult(null);
     try {
-      const result = await api.uploadParcelDataset(uploadFile, replaceAll);
+      const review = await api.uploadParcelDataset(uploadFile, replaceAll, true);
+      if(review.warnings?.length&&!window.confirm('Revisa antes de importar:\n\n'+review.warnings.join('\n')+'\n\n¿Deseas continuar?'))return;
+      const result = await api.uploadParcelDataset(uploadFile, replaceAll, false, review.review_token);
       setUploadResult(result);
       setUploadFile(null);
       if (fileInputRef.current) fileInputRef.current.value = '';

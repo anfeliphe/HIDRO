@@ -1,3 +1,4 @@
+from app.services.hidro_data import daily_for, yearly_for
 from app.services.hidro_data import demand_parcels, unified_records
 """
 PDF export: multi-page water demand report with charts, map snippets, and structured AI analysis.
@@ -70,15 +71,13 @@ async def _gather_report_payload(
     parcels = await demand_parcels(db, uid, land_use)
 
     l_per = L_PER_CAPITA_100 if scenario == 100 else L_PER_CAPITA_90
-    total_daily = sum(parcel_daily_consumption(p.population, l_per, p.land_use) for p in parcels)
+    total_daily = sum(daily_for(p, l_per) for p in parcels)
     total_pop = sum(p.population for p in parcels)
 
     breakdown_map = {"Residential": {"count": 0, "consumption": 0}, "Commercial": {"count": 0, "consumption": 0}, "Mixed-use": {"count": 0, "consumption": 0}}
     for p in parcels:
-        breakdown_map[p.land_use]["count"] += 1
-        breakdown_map[p.land_use]["consumption"] += parcel_yearly_consumption(
-            p.population, L_PER_CAPITA_90, p.land_use
-        )
+        breakdown_map.setdefault(p.land_use, {"count":0,"consumption":0})["count"] += 1
+        breakdown_map[p.land_use]["consumption"] += yearly_for(p, L_PER_CAPITA_90)
     total_c = sum(b["consumption"] for b in breakdown_map.values())
     breakdown_list = [
         {
@@ -90,8 +89,8 @@ async def _gather_report_payload(
         for k, v in breakdown_map.items()
     ]
 
-    base90 = sum(parcel_yearly_consumption(p.population, L_PER_CAPITA_90, p.land_use) for p in parcels)
-    base100 = sum(parcel_yearly_consumption(p.population, L_PER_CAPITA_100, p.land_use) for p in parcels)
+    base90 = sum(yearly_for(p, L_PER_CAPITA_90) for p in parcels)
+    base100 = sum(yearly_for(p, L_PER_CAPITA_100) for p in parcels)
     growth_rate = max(0.0, min(20.0, float(growth_rate)))
     years = max(1, min(20, int(years)))
     fd = project_demand(base90, base100, growth_rate, years)
@@ -108,7 +107,7 @@ async def _gather_report_payload(
                 "lng": float(p.lng),
                 "land_use": p.land_use,
                 "population": int(p.population or 0),
-                "yearly_liters": parcel_yearly_consumption(p.population, L_PER_CAPITA_90, p.land_use),
+                "yearly_liters": yearly_for(p, L_PER_CAPITA_90),
             }
         )
     if len(parcel_points) > MAX_MAP_POINTS:
@@ -255,7 +254,7 @@ async def export_pdf_report(
         ai_sections = await _ai_structured_analysis(payload)
         records = await unified_records(db, _user_id)
         eligible = len(await demand_parcels(db, _user_id))
-        scope = f"HIDRO integrated dataset: {len(records)} records; {eligible} eligible for demand estimates; {sum(r['dato_simulado'] is True for r in records)} marked simulated. Missing populations and unsupported land uses are excluded from demand. This PDF covers eligible records and does not apply the screen's sector/source filters. "
+        scope = f"Conjunto integrado HIDRO: {len(records)} registros; {eligible} incluidos en la estimación; {sum(r['dato_simulado'] is True for r in records)} simulados. Incluye supuestos por actividad; revisar las fichas. El informe no aplica los filtros de sector/origen de la pantalla. "
         ai_sections['limitations'] = scope + ai_sections.get('limitations', '')
         ai_sections['executive'] = scope + ai_sections.get('executive', '')
         pdf_bytes = build_water_demand_report_pdf(payload, ai_sections)

@@ -27,6 +27,8 @@ class Settings(BaseSettings):
 
     # Chatbot (OpenAI). Leave empty to disable chat API; frontend will use keyword fallback.
     OPENAI_API_KEY: str = ""
+    OPENAI_CHAT_MODEL: str = "gpt-4.1-mini"
+    CHAT_WEB_ENABLED: bool = True
 
     class Config:
         env_file = ".env"

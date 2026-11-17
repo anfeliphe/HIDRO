@@ -15,10 +15,10 @@ async def unified_records(db, uid):
         r.update(id_predio_demo=p.parcel_id,clase_uso=USES.get(p.land_use,p.land_use),numero_habitantes=p.population,lat=p.lat,lng=p.lng,barrio='Sin sector informado',origen='HIDRO existente')
         records[p.parcel_id]=r
     for p in surveys:
-        records[p.external_id]={**p.payload,'origen':'Caracterización EAAB · CSV'}
+        records[p.external_id]={**p.payload,'origen':'Registro manual HIDRO' if p.payload.get('_manual') else 'Caracterización EAAB · CSV'}
     for r in records.values():
         factors={'Residencial':1.0}
-        if r['origen']=='HIDRO existente':factors.update({'Comercial':1.2,'Mixto':1.1})
+        if r['origen']=='HIDRO existente' or r.get('_historic_coefficients'):factors.update({'Comercial':1.2,'Mixto':1.1})
         k=factors.get(r['clase_uso']);pop=r['numero_habitantes']
         r['coeficiente_demanda']=k
         r['demanda_diaria_90_m3']=None if k is None or pop is None else pop*.09*k

@@ -105,3 +105,81 @@ async def delete_census_record(external_id: str, db: AsyncSession = Depends(get_
     await db.delete(record)
     await db.commit()
     return {'message': 'Registro importado eliminado.'}
+
+
+class ManualRecordBody(BaseModel):
+    record: dict
+
+
+def validate_manual_record(raw):
+    """Preserve missing values; do not turn unreported counts or booleans into zero/no."""
+    r={key:raw.get(key) for key in FIELDS}
+    for key in set(FIELDS)-set(NUMBERS)-set(BOOLEANS)-{'lat','lng'}:
+        val=r[key]
+        if val is not None and not isinstance(val,str):
+            raise ValueError(f'{key}: se esperaba texto.')
+        r[key]=(val or '').strip() or None
+        if r[key] and len(r[key])>500:raise ValueError(f'{key}: máximo 500 caracteres.')
+    if not r['id_predio_demo'] or len(r['id_predio_demo'])>100:
+        raise ValueError('El identificador es obligatorio y admite hasta 100 caracteres.')
+    if r['clase_uso'] not in ['Residencial','Comercial','Mixto','Industrial','Oficial','Multiusuario']:
+        raise ValueError('Selecciona un uso del predio válido.')
+    if r['fecha_censo']:
+        try:date.fromisoformat(r['fecha_censo'])
+        except ValueError:raise ValueError('La fecha del censo no es válida.')
+    limits={**NUMBERS,'numero_habitantes':10000}
+    for key,limit in limits.items():
+        val=r[key]
+        if val is None or val=='':r[key]=None;continue
+        if isinstance(val,bool):raise ValueError(f'{key}: ingresa un número.')
+        try:val=float(val)
+        except (ValueError,TypeError):raise ValueError(f'{key}: ingresa un número.')
+        if not math.isfinite(val) or not 0<=val<=limit or (key!='horas_servicio' and not val.is_integer()):
+            raise ValueError(f'{key}: valor fuera de rango (0–{limit}).')
+        r[key]=val if key=='horas_servicio' else int(val)
+    for key in BOOLEANS:
+        if r[key] is not None and not isinstance(r[key],bool):raise ValueError(f'{key}: selecciona Sí, No o Sin información.')
+    for key,limit in [('lat',90),('lng',180)]:
+        val=r[key]
+        if val is None or val=='' or isinstance(val,bool):raise ValueError('La latitud y longitud son obligatorias.')
+        try:val=float(val)
+        except (ValueError,TypeError):raise ValueError('La latitud y longitud deben ser numéricas.')
+        if not math.isfinite(val) or not -limit<=val<=limit:raise ValueError(f'{key}: coordenada fuera de rango.')
+        r[key]=val
+    if r['tiene_agua'] is not True and r['horas_servicio'] is not None:
+        raise ValueError('Informa las horas de suministro solo cuando recibe agua de red.')
+    a,b,t=(r[k] for k in ['unidades_habitacionales','unidades_no_habitacionales','total_unidades'])
+    if all(v is not None for v in (a,b,t)) and a+b!=t:raise ValueError('El total de unidades debe ser la suma de las unidades de vivienda y no residenciales.')
+    if r['numero_habitantes'] is not None and r['numero_familias'] is not None and r['numero_habitantes']<r['numero_familias']:
+        raise ValueError('El número de habitantes no puede ser menor que el de familias.')
+    return r
+
+async def save_manual_record(body,db,uid,external_id=None):
+    from app.models.parcel import Parcel
+    from sqlalchemy.exc import IntegrityError
+    try:r=validate_manual_record(body.record)
+    except ValueError as e:raise HTTPException(400,str(e))
+    key=r['id_predio_demo']
+    if external_id is not None and key!=external_id:raise HTTPException(400,'No se puede cambiar el identificador al editar.')
+    current=(await db.execute(select(CensusRecord).where(CensusRecord.owner_id==uid,CensusRecord.external_id==key))).scalar_one_or_none()
+    legacy=(await db.execute(select(Parcel).where(Parcel.parcel_id==key))).scalar_one_or_none()
+    if external_id is None and (current is not None or legacy is not None):raise HTTPException(409,'Ya existe un predio con ese identificador. Utiliza Editar.')
+    if external_id is not None and current is None and legacy is None:raise HTTPException(404,'No se encontró el predio para editar.')
+    # Server-owned metadata keeps historical demand coefficients without exposing them as editable inputs.
+    r['_manual']=True
+    r['_historic_coefficients']=bool(current.payload.get('_historic_coefficients')) if current is not None else legacy is not None
+    if current is not None:current.payload=r
+    else:db.add(CensusRecord(owner_id=uid,external_id=key,payload=r))
+    try:await db.commit()
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(409,'El predio ya existe. Actualiza la lista antes de continuar.')
+    return {'message':'Predio guardado.','id_predio_demo':key}
+
+@router.post('/records',status_code=201)
+async def create_manual_record(body:ManualRecordBody,db:AsyncSession=Depends(get_db),uid:int=Depends(get_current_user_id)):
+    return await save_manual_record(body,db,uid)
+
+@router.put('/records/{external_id}')
+async def update_manual_record(external_id:str,body:ManualRecordBody,db:AsyncSession=Depends(get_db),uid:int=Depends(get_current_user_id)):
+    return await save_manual_record(body,db,uid,external_id)

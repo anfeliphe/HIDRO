@@ -1,0 +1,5 @@
+Copiar tests-ui y vitest.config.mjs a la raíz de una copia local del repositorio.
+Instalar temporalmente: npm install --no-save --package-lock=false vitest@2.1.9 jsdom@25.0.1 @testing-library/react@16.1.0
+Ejecutar: npx vitest run --config vitest.config.mjs
+Servidor: desde backend, python -m unittest discover -s tests -v
+No se incluyen bases de datos ni claves.

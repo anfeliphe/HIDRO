@@ -1,3 +1,4 @@
+from app.api.activity import record_event
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
@@ -74,6 +75,7 @@ async def create_parcel(
         lng=data.lng,
     )
     db.add(p)
+    record_event(db,_user_id,'creacion',predio=p.parcel_id,alcance='Registro histórico compartido')
     await db.commit()
     await db.refresh(p)
     return _parcel_to_response(p)
@@ -111,6 +113,7 @@ async def update_parcel(
         p.lat = data.lat
     if data.lng is not None:
         p.lng = data.lng
+    record_event(db,_user_id,'edicion',predio=p.parcel_id,alcance='Registro histórico compartido')
     await db.commit()
     await db.refresh(p)
     return _parcel_to_response(p)
@@ -192,6 +195,7 @@ async def upload_parcels(
         except Exception as e:
             errors.append(f"Fila {i + 1} ({row.get('parcel_id', '?')}): {e}")
 
+    record_event(db,_user_id,'importacion',registros=inserted+updated,creados=inserted,actualizados=updated,formato='Histórico',reemplazo=replace_all)
     await db.commit()
 
     return {
@@ -212,5 +216,6 @@ async def delete_parcel(parcel_id: str, db: AsyncSession = Depends(get_db),
     if parcel is None:
         raise HTTPException(status_code=404, detail="No se encontró el predio")
     await db.delete(parcel)
+    record_event(db,_user_id,'eliminacion',predio=parcel_id,alcance='Registro histórico compartido')
     await db.commit()
     return {"message": "Predio eliminado."}

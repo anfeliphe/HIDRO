@@ -172,8 +172,8 @@ const Chat = () => {
   const hasMessages = messages.length > 0;
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-gradient-to-b from-gray-50/80 to-white">
-      <div className="shrink-0 border-b border-gray-200/70 bg-white/90 px-4 py-4 backdrop-blur-md sm:px-6 lg:pl-6 pl-16">
+    <div className="pro-chat flex h-full min-h-0 flex-col bg-gradient-to-b from-gray-50/80 to-white">
+      <div className="shrink-0 border-b border-gray-200/70 bg-white/90 px-4 py-4 backdrop-blur-md sm:px-6 lg:pl-6 pl-4">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-md shadow-blue-500/20">
@@ -181,7 +181,7 @@ const Chat = () => {
             </div>
             <div>
               <h2 className="text-lg font-semibold tracking-tight text-gray-900">Asistente HIDRO</h2>
-              <p className="text-xs text-gray-500">Datos integrados de HIDRO. El chat no aplica los filtros visuales; la demanda cubre solo predios aptos.</p>
+              <p className="text-xs text-gray-500">Consulta predios, interpreta estimaciones y revisa información. El chat usa todos tus registros accesibles.</p>
             </div>
           </div>
           <button
@@ -207,7 +207,7 @@ const Chat = () => {
                 <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/25">
                   <Sparkles className="h-7 w-7 text-white" />
                 </div>
-                <h3 className="mb-2 text-xl font-semibold text-gray-900">Consulta la demanda de agua</h3>
+                <h3 className="mb-2 text-xl font-semibold text-gray-900">Conversa con tu territorio</h3>
                 <p className="mx-auto max-w-md text-sm leading-relaxed text-gray-600">
                   Consulta totales, usos del predio, proyecciones y comparaciones en una conversación.
                 </p>

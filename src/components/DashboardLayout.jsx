@@ -1,82 +1,28 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
-import SidebarNavigation from './SidebarNavigation';
-import HeaderBar from './HeaderBar';
-import { downloadPdfReport } from '../api/client';
-
-const DashboardLayout = () => {
-  const location = useLocation();
-  const contentRef = useRef(null);
-  useEffect(() => {
-    const node = contentRef.current;
-    if (!node || !node.animate || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    // Animate navigation without remounting pages or resetting their filters.
-    const animation = node.animate(
-      [{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'translateY(0)' }],
-      { duration: 300, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' },
-    );
-    return () => animation.cancel();
-  }, [location.pathname]);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [scenario, setScenario] = useState(90);
-  const [growthRate, setGrowthRate] = useState(2);
-  const [projectionYears, setProjectionYears] = useState(5);
-  /** Land-use filter last seen on Dashboard (export uses this when generating PDF). */
-  const [reportLandUse, setReportLandUse] = useState('All');
-  const [exportLoading, setExportLoading] = useState(false);
-
-  const handleExport = useCallback(async () => {
-    setExportLoading(true);
-    try {
-      await downloadPdfReport({
-        scenario,
-        growthRate,
-        projectionYears,
-        landUse: reportLandUse,
-      });
-    } catch (e) {
-      alert(e?.message || "No se pudo generar el PDF. Verifica tu sesión e intenta de nuevo.");
-    } finally {
-      setExportLoading(false);
-    }
-  }, [scenario, growthRate, projectionYears, reportLandUse]);
-  
-  // Show full header controls on Dashboard and Analytics so growth/years can be changed from either page
-  const showFullControls = location.pathname === '/' || location.pathname === '/analytics';
-  
-  return (
-    <div className="flex h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 overflow-hidden">
-      <SidebarNavigation 
-        isCollapsed={isSidebarCollapsed} 
-        onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
-      />
-      <div className={`flex-1 flex flex-col min-w-0 transition-[margin] duration-300 ease-out ${isSidebarCollapsed ? 'ml-16' : 'lg:ml-64'} ml-0`}>
-        {!["/", "/map", "/analytics", "/parcels", "/data-sources"].includes(location.pathname) && <HeaderBar
-          scenario={scenario}
-          onScenarioChange={setScenario}
-          growthRate={growthRate}
-          onGrowthChange={setGrowthRate}
-          projectionYears={projectionYears}
-          onProjectionChange={setProjectionYears}
-          onExport={handleExport}
-          exportLoading={exportLoading}
-          showFullControls={showFullControls}
-        />}
-        <main ref={contentRef} className="flex-1 overflow-auto bg-gradient-to-br from-gray-50 via-white to-gray-50">
-          <Outlet context={{ 
-            scenario, 
-            growthRate, 
-            projectionYears,
-            setScenario,
-            setGrowthRate,
-            setProjectionYears,
-            setReportLandUse,
-            handleExport
-          }} />
-        </main>
-      </div>
-    </div>
-  );
-};
-
-export default DashboardLayout;
+import {useState,useEffect,useRef} from 'react';
+import {Outlet,NavLink,useLocation,useNavigate,Link} from 'react-router-dom';
+import {LayoutDashboard,Map,BarChart3,MessageSquare,Building2,Database,ShieldCheck,History,FileText,Settings,HelpCircle,Search,LogOut,Menu,X,ChevronRight,RefreshCw,Droplets,ArrowUpRight} from 'lucide-react';
+import {HidroProvider,useHidro} from '../pro/Store';
+import Modal from '../pro/Modal';
+import {normalize,format} from '../pro/data';
+import {downloadPdfReport} from '../api/client';
+import '../pages/Census.css';
+import '../pro/pro.css';
+const navigation=[['ESPACIO DE TRABAJO',[['/','Resumen',LayoutDashboard],['/map','Explorador del mapa',Map],['/analytics','Análisis de demanda',BarChart3],['/chat','Asistente HIDRO',MessageSquare]]],['INFORMACIÓN',[['/parcels','Predios',Building2],['/data-sources','Fuentes de datos',Database],['/quality','Calidad de datos',ShieldCheck],['/reports','Reportes',FileText],['/activity','Historial',History]]]];
+function Shell(){const {rows,loading,error,lastSync,refresh,preferences,updatePreferences,notice,setNotice}=useHidro();const [narrow,setNarrow]=useState(()=>window.innerWidth<=1000);const [mobile,setMobile]=useState(false),[search,setSearch]=useState(false),[query,setQuery]=useState(''),[exportLoading,setExportLoading]=useState(false);const location=useLocation(),navigate=useNavigate(),main=useRef(null);const title=navigation.flatMap(g=>g[1]).find(n=>n[0]===location.pathname)?.[1]||({'/settings':'Preferencias','/profile':'Mi cuenta','/help':'Centro de ayuda'}[location.pathname])||'HIDRO';
+useEffect(()=>{const media=window.matchMedia('(max-width: 1000px)');const resize=()=>setNarrow(media.matches);media.addEventListener('change',resize);return()=>media.removeEventListener('change',resize);},[]);
+useEffect(()=>{setMobile(false);main.current?.scrollTo({top:0});document.title=title+' · HIDRO';if(!preferences.reducedMotion&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches)main.current?.animate?.([{opacity:0,transform:'translateY(7px)'},{opacity:1,transform:'translateY(0)'}],{duration:220,easing:'ease-out'});},[location.pathname]);
+useEffect(()=>{function key(e){if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();setSearch(s=>!s);}if(e.key==='Escape')setMobile(false);}window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key);},[]);
+function logout(){['authToken','userName','userId'].forEach(k=>localStorage.removeItem(k));navigate('/login',{replace:true});}
+async function handleExport(){setExportLoading(true);try{await downloadPdfReport({scenario:preferences.scenario,growthRate:preferences.growth,projectionYears:preferences.years,landUse:'All'});}catch(e){setNotice(e.message);}finally{setExportLoading(false);}}
+const results=query.trim()?rows.filter(r=>[r.id_predio_demo,r.direccion,r.barrio].some(v=>normalize(v).includes(normalize(query)))).slice(0,12):[];
+return <div className={'pro-shell '+(preferences.reducedMotion?'motion-off':'')}><a className="skip-link" href="#contenido">Saltar al contenido</a>{mobile&&<button className="pro-shade" aria-label="Cerrar menú" onClick={()=>setMobile(false)}/>}
+<aside aria-hidden={narrow&&!mobile?true:undefined} inert={narrow&&!mobile?'':undefined} className={'pro-sidebar '+(mobile?'open':'')}><Link className="pro-brand" to="/"><span className="brand-symbol"><Droplets size={25}/></span><span>HIDRO<small>INTELIGENCIA HÍDRICA</small></span></Link><button className="mobile-close icon-button" aria-label="Cerrar menú" onClick={()=>setMobile(false)}><X/></button><div className="project-name"><span className="project-square">H</span><div><strong>{preferences.project}</strong><small>Espacio de gestión</small></div></div>
+<nav aria-label="Navegación principal">{navigation.map(([group,items])=><div key={group}><p className="nav-label">{group}</p>{items.map(([path,label,Icon])=><NavLink end to={path} key={path} className={({isActive})=>isActive?'nav-item active':'nav-item'}><Icon size={18}/><span>{label}</span>{path==='/parcels'&&<small>{format(rows.length,0)}</small>}</NavLink>)}</div>)}</nav>
+<div className="sidebar-bottom"><Link className="nav-item" to="/help"><HelpCircle size={18}/>Centro de ayuda</Link><Link className="nav-item" to="/settings"><Settings size={18}/>Preferencias</Link><div className="sidebar-user"><Link to="/profile"><span className="avatar">{(localStorage.getItem('userName')||'H').slice(0,1).toUpperCase()}</span><div><strong>{localStorage.getItem('userName')||'Mi cuenta'}</strong><small>Ver perfil</small></div></Link><button aria-label="Cerrar sesión" title="Cerrar sesión" onClick={logout}><LogOut size={17}/></button></div></div></aside>
+<div className="pro-main"><header className="pro-topbar"><div className="breadcrumbs"><button className="mobile-toggle icon-button" aria-label="Abrir menú" aria-expanded={mobile} onClick={()=>setMobile(true)}><Menu size={21}/></button><span>Espacio de trabajo</span><ChevronRight size={14}/><strong>{title}</strong></div><div className="topbar-actions"><button className="search-trigger" onClick={()=>setSearch(true)}><Search size={16}/><span>Buscar predio</span><kbd>Ctrl K</kbd></button><button className="icon-button" onClick={refresh} disabled={loading} title="Actualizar datos" aria-label="Actualizar datos"><RefreshCw size={17} className={loading?'spin':''}/></button><span className={'connection '+(error?'warning':'')} title={lastSync?'Última consulta: '+lastSync.toLocaleString('es-CO'):''}><i/>{loading?'Consultando':error?'Sin actualizar':'Datos consultados'}</span></div></header>
+{notice&&<div className="pro-toast" role="status">{notice}<button aria-label="Cerrar aviso" onClick={()=>setNotice('')}><X size={16}/></button></div>}
+<main id="contenido" ref={main} tabIndex={-1} className="pro-content"><Outlet context={{scenario:preferences.scenario,growthRate:preferences.growth,projectionYears:preferences.years,setScenario:v=>updatePreferences({scenario:v}),setGrowthRate:v=>updatePreferences({growth:v}),setProjectionYears:v=>updatePreferences({years:v}),handleExport,exportLoading}}/></main></div>
+{search&&<Modal title="Buscar en HIDRO" onClose={()=>{setSearch(false);setQuery('');}}><div className="command-body"><label className="pro-search"><Search size={18}/><input autoFocus placeholder="Identificador, dirección o barrio…" value={query} onChange={e=>setQuery(e.target.value)}/></label><p className="muted">Búsqueda en los {rows.length} predios disponibles para tu cuenta.</p>{results.map(r=><button className="command-result" key={r.id_predio_demo} onClick={()=>{navigate('/parcels?id='+encodeURIComponent(r.id_predio_demo));setSearch(false);setQuery('');}}><Building2 size={18}/><span><strong>{r.id_predio_demo}</strong><small>{r.direccion||'Sin dirección'} · {r.barrio||'Sin sector'}</small></span><ArrowUpRight size={16}/></button>)}{query&&!results.length&&<p className="empty-small">No se encontraron coincidencias.</p>}{!query&&<div className="command-links"><Link to="/data-sources" onClick={()=>setSearch(false)}>Importar datos <ArrowUpRight size={16}/></Link><Link to="/quality" onClick={()=>setSearch(false)}>Revisar calidad <ArrowUpRight size={16}/></Link></div>}</div></Modal>}
+</div>;
+}
+export default function DashboardLayout(){return <HidroProvider><Shell/></HidroProvider>;}

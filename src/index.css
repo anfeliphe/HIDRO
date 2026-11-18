@@ -289,8 +289,8 @@
 }
 
 /* Identidad visual de HIDRO: tipografía y acentos comunes. */
-:root {font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif; color: #182235;}
-body, button, input, select, textarea {font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;}
+:root {font-family: 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif; color: #182235;}
+body, button, input, select, textarea {font-family: 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;}
 .btn-primary {background:linear-gradient(135deg,#3979ff,#5147ef);box-shadow:0 5px 12px #485ee82b;border-radius:12px;}
 .btn-primary:hover {background:linear-gradient(135deg,#326ae4,#453bd8);}
 .card,.card-gradient {background:#fff;box-shadow:0 4px 8px #17223c05,0 10px 28px #17223c0a;border-color:#e9edf4;}

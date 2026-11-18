@@ -1,0 +1,66 @@
+HIDRO — Rediseño profesional
+Actualización sobre HIDRO_consumos_chat_validacion y el repositorio anfeliphe/HIDRO.
+
+INSTALAR EN GITHUB Y RENDER
+1. Conserva un respaldo reciente de la base de datos y anota el commit actual del repositorio.
+2. Descomprime el ZIP y entra a la carpeta que contiene src, backend y public.
+3. En la raíz de tu repositorio, usa Add file > Upload files.
+4. Sube src, backend, public e index.html. No subas la carpeta que los contiene.
+5. Guarda el cambio y espera que el servidor WebGIS y la página WebGIS-2 terminen de desplegar.
+6. Recarga con Ctrl + Shift + R. Entra con tu cuenta de siempre.
+
+No cambies DATABASE_URL ni los directorios de Render. No necesitas volver a cargar tus predios.
+Los archivos de este ZIP son una actualización, no una copia completa del repositorio. Conserva los demás archivos existentes.
+No se ha modificado ni desplegado tu aplicación publicada desde aquí.
+
+NUEVA ESTRUCTURA
+Resumen: indicadores de territorio, mapa, demanda por uso y acceso a la revisión de datos.
+Explorador del mapa: mapa ampliado, búsqueda, capas, encuadre y pantalla completa cuando el navegador la permite. Los filtros de otras vistas no limitan este mapa; su búsqueda es independiente.
+Predios: filtros, ordenamiento, selección, paginación y exportación de las filas seleccionadas. Crear, editar y eliminar desde fichas completas.
+Análisis: escenarios residenciales, proyección anual y distribución de demanda.
+Fuentes: carga por selección o arrastre, vista previa, avisos y confirmación antes de guardar. Conserva la importación histórica.
+Calidad: información faltante, cantidades provisionales, registros sin cálculo y posibles coincidencias de dirección o coordenadas.
+Reportes: impresión/PDF de la vista filtrada e informe completo descargable del servidor, con alcances separados.
+Historial: operaciones realizadas desde esta actualización; cada cuenta ve su propio historial.
+Ayuda: guía, preguntas frecuentes, metodología y catálogo de 27 actividades.
+Preferencias: nombre del espacio, escenario, crecimiento, horizonte, tamaño de página y movimiento reducido. Se guardan por cuenta en este navegador.
+Asistente: conserva imágenes, consulta de datos y búsqueda web; necesita la configuración de IA del servidor.
+Perfil: conserva actualización de información personal y cambio de contraseña.
+
+DATOS E HISTORIAL
+Se añade automáticamente la tabla hidro_activity_events al iniciar el servidor. La cuenta de PostgreSQL debe poder crear tablas, como en las actualizaciones anteriores.
+No se borran ni se reconstruyen los datos existentes. El historial comienza a partir de esta versión; no inventa eventos anteriores.
+El historial registra tipo de operación, fecha, usuario propietario y los identificadores o recuentos correspondientes. No almacena claves, imágenes ni el texto del chat. No es un sistema de auditoría inmutable ni permite deshacer cambios.
+Los registros históricos siguen siendo compartidos; la confirmación de eliminación lo explica. Las fichas personalizadas y su historial se limitan a su propietario. No se han inventado roles de administrador ni permisos que el sistema anterior no tenía.
+Una misma ficha puede aparecer en varias revisiones de calidad. Una coincidencia no prueba que haya un duplicado: revisa si son unidades distintas.
+
+CÁLCULOS Y REPORTES
+Se conserva el modelo por actividad de la actualización anterior, con sus factores editables, supuestos y composición de usos mixtos.
+Los valores son estimaciones, no lecturas, facturas ni parámetros oficiales de la EAAB.
+El resumen usa el escenario residencial guardado en Preferencias. El mapa de demanda y la columna base del inventario usan 90 L/persona/día en la parte residencial, identificado en su contenido.
+Exportar CSV conserva los identificadores y componentes de consumo. La selección manual exporta únicamente las filas seleccionadas.
+Imprimir / guardar PDF: usa los filtros actuales de Reportes y el escenario seleccionado. Se abre el diálogo de impresión del navegador.
+Descargar PDF completo: usa todos los predios accesibles a la cuenta y NO aplica los filtros visuales. Lo indica el botón y su descripción.
+
+VERIFICACIÓN REALIZADA
+- Compilación de producción completada.
+- 25 pruebas del servidor correctas: cálculos, importación, edición, duplicados, aislamiento, PDF, validación de imágenes, consultas del chat simuladas e historial.
+- 6 pruebas de interfaz correctas: búsqueda con tildes, fichas, exportación por selección, preferencias, reporte filtrado, calidad y confirmación de coincidencias (varios casos dentro de las pruebas).
+- Sin referencias al proveedor externo en los archivos activos entregados.
+- Se dividió la carga del código por páginas: el chat y las herramientas se cargan al abrirlas.
+
+PENDIENTES DE ACEPTACIÓN TRAS DESPLEGAR
+El navegador de pruebas no pudo iniciarse en el entorno de preparación. Las pruebas de interfaz verifican comportamiento con un DOM simulado, no la apariencia visual ni el mapa real.
+Verifica en computador y celular: navegación, menú, mapa, formulario, ficha, chat y reporte impreso.
+Verifica imágenes e internet con tu API real: no se hicieron solicitudes facturables de IA durante estas pruebas.
+No se cambiaron claves, dominios, cuentas ni datos de producción.
+
+PRUEBA RÁPIDA RECOMENDADA
+1. Confirma que aparezca la misma cantidad de predios que antes.
+2. Busca un identificador usando Ctrl + K y abre su ficha.
+3. Cambia el uso/sector en Predios y comprueba el alcance del reporte filtrado.
+4. Crea un predio de prueba claramente marcado como simulado, edítalo y revisa Historial.
+5. Elimina ese predio de prueba y confirma que el historial registre la operación.
+6. Comprueba una consulta del asistente y el mapa en una pantalla pequeña.
+
+La carpeta verificacion contiene las pruebas de interfaz para revisión técnica. No es necesario subirla para usar HIDRO. Las pruebas Python están en backend/tests.

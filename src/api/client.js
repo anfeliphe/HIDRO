@@ -1,7 +1,8 @@
 function errorEnEspanol(message,status){
  const text=String(message||'');
  if(status===401)return 'Correo o contraseña incorrectos, o sesión vencida. Inicia sesión de nuevo.';
- if(status===422)return 'Revisa los campos: faltan datos obligatorios o alguno no tiene el formato permitido.';
+ if(status===422)return text||'Revisa los campos: faltan datos obligatorios o alguno no tiene el formato permitido.';
+ if((status===502||status===503)&&/^(El asistente|El servicio de IA|No se pudo completar el análisis)/.test(text))return text;
  if(status>=500)return 'No se pudo completar la solicitud. Intenta de nuevo en unos momentos.';
  const known={'Failed to fetch':'No se pudo conectar con HIDRO. Revisa tu conexión.','Parcel ID already exists':'Ya existe un predio con ese identificador','Parcel not found':'No se encontró el predio','Email already registered':'El correo electrónico ya está registrado','Not Found':'No se encontró el recurso solicitado','Forbidden':'No tienes permiso para esta operación','Bad Request':'Revisa los datos enviados'};
  return known[text]||text||'No se pudo completar la solicitud.';
@@ -42,7 +43,7 @@ export async function apiFetch(path, options = {}) {
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: res.statusText }));
     const msg = Array.isArray(err.detail)
-      ? err.detail.map((e) => e.msg || JSON.stringify(e)).join(". ")
+      ? err.detail.map((e) => (e.loc?.slice(1).join(" → ")||"Dato")+": "+(e.msg||"Valor inválido")).join(". ")
       : err.detail || res.statusText;
     throw new Error(errorEnEspanol(typeof msg === "string" ? msg : JSON.stringify(msg),res.status));
   }
@@ -191,7 +192,7 @@ export async function downloadPdfReport({
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: res.statusText }));
     const msg = Array.isArray(err.detail)
-      ? err.detail.map((e) => e.msg || JSON.stringify(e)).join(". ")
+      ? err.detail.map((e) => (e.loc?.slice(1).join(" → ")||"Dato")+": "+(e.msg||"Valor inválido")).join(". ")
       : err.detail || res.statusText;
     throw new Error(errorEnEspanol(typeof msg === "string" ? msg : JSON.stringify(msg),res.status));
   }

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { CheckCircle2, Database, Map, Upload, Download, AlertCircle } from 'lucide-react';
 import * as api from '../api/client';
 
-const DataSources = () => {
+const DataSources = ({onImported} = {}) => {
   const [uploadFile, setUploadFile] = useState(null);
   const [replaceAll, setReplaceAll] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -67,6 +67,7 @@ const DataSources = () => {
       if(review.warnings?.length&&!window.confirm('Revisa antes de importar:\n\n'+review.warnings.join('\n')+'\n\n¿Deseas continuar?'))return;
       const result = await api.uploadParcelDataset(uploadFile, replaceAll, false, review.review_token);
       setUploadResult(result);
+      await onImported?.();
       setUploadFile(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
     } catch (err) {

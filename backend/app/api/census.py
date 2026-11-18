@@ -1,3 +1,4 @@
+from app.api.activity import record_event
 """Provisional census import, isolated from demand estimates and legacy parcels."""
 import csv
 import io
@@ -113,6 +114,7 @@ async def import_census(body:ImportBody, db:AsyncSession=Depends(get_db), uid:in
             key=r['id_predio_demo']
             if key in existing: existing[key].payload=r
             else: db.add(CensusRecord(owner_id=uid,external_id=key,payload=r))
+        record_event(db,uid,'importacion',registros=len(rows),creados=len(rows)-updated,actualizados=updated)
         await db.commit()
     return {'total':len(rows),'inserted':len(rows)-updated,'updated':updated,'simulated':sum(r['dato_simulado'] for r in rows),'preview':body.preview,'warnings':warnings,'review_token':token}
 
@@ -126,6 +128,7 @@ async def delete_census_record(external_id: str, db: AsyncSession = Depends(get_
     if record is None:
         raise HTTPException(status_code=404, detail='No se encontró el predio importado')
     await db.delete(record)
+    record_event(db,user_id,'eliminacion',predio=external_id,alcance='Ficha del usuario')
     await db.commit()
     return {'message': 'Registro importado eliminado.'}
 
@@ -203,6 +206,7 @@ async def save_manual_record(body,db,uid,external_id=None):
     r['_historic_coefficients']=bool(current.payload.get('_historic_coefficients')) if current is not None else legacy is not None
     if current is not None:current.payload=r
     else:db.add(CensusRecord(owner_id=uid,external_id=key,payload=r))
+    record_event(db,uid,'edicion' if external_id else 'creacion',predio=key)
     try:await db.commit()
     except IntegrityError:
         await db.rollback()

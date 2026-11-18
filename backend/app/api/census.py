@@ -1,3 +1,4 @@
+from app.services.eaab_consumption import validate as validate_eaab, catalog as eaab_catalog, calculate as calculate_eaab
 from app.api.activity import record_event
 """Provisional census import, isolated from demand estimates and legacy parcels."""
 import csv
@@ -65,6 +66,8 @@ def parse_census(content):
             if raw.get('componentes_consumo'):
                 try: r['componentes_consumo']=validate_components(json.loads(raw['componentes_consumo']),r['clase_uso'])
                 except (ValueError,TypeError) as e: raise ValueError(f'componentes_consumo: {e}')
+            if 'calculo_eaab' in raw:
+                r['calculo_eaab']=validate_eaab(json.loads(raw['calculo_eaab']) if raw['calculo_eaab'] else None,r['clase_uso'])
             rows.append(r)
             if len(rows)>5000: raise ValueError('Máximo 5000 predios por archivo.')
         except (ValueError,TypeError) as e:
@@ -106,6 +109,9 @@ async def import_census(body:ImportBody, db:AsyncSession=Depends(get_db), uid:in
             if r['componentes_consumo']:
                 try:validate_components(r['componentes_consumo'],r['clase_uso'])
                 except ValueError:raise HTTPException(400,f"{r['id_predio_demo']}: el cambio de uso requiere revisar las actividades de consumo.")
+        if r['id_predio_demo'] in existing and 'calculo_eaab' not in r:
+            try:r['calculo_eaab']=validate_eaab(existing[r['id_predio_demo']].payload.get('calculo_eaab'),r['clase_uso'])
+            except ValueError as e:raise HTTPException(400,str(e))
     token=review_token(rows,visible)
     if not body.preview and warnings and body.review_token!=token:
         raise HTTPException(409,'Hay coincidencias o actualizaciones. Revisa la vista previa y confirma de nuevo.')
@@ -181,6 +187,7 @@ def validate_manual_record(raw):
     if r['numero_habitantes'] is not None and r['numero_familias'] is not None and r['numero_habitantes']<r['numero_familias']:
         raise ValueError('El número de habitantes no puede ser menor que el de familias.')
     r['componentes_consumo']=validate_components(raw.get('componentes_consumo'),r['clase_uso'])
+    r['calculo_eaab']=validate_eaab(raw.get('calculo_eaab'),r['clase_uso'])
     return r
 
 async def save_manual_record(body,db,uid,external_id=None):
@@ -224,3 +231,12 @@ async def update_manual_record(external_id:str,body:ManualRecordBody,db:AsyncSes
 @router.get('/activity-catalog')
 async def activity_catalog(uid:int=Depends(get_current_user_id)):
     return list(CATALOG.values())
+
+@router.get('/eaab-catalog')
+async def get_eaab_catalog(uid:int=Depends(get_current_user_id)):
+    return eaab_catalog()
+
+@router.post('/eaab-preview')
+async def preview_eaab(body:dict,uid:int=Depends(get_current_user_id)):
+    try:return calculate_eaab(body.get('calculo_eaab'),body.get('clase_uso'))
+    except (ValueError,TypeError) as e:raise HTTPException(400,str(e))

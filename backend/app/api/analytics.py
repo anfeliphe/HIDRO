@@ -40,7 +40,7 @@ async def get_summary(
     total_pop = sum(p.population for p in parcels)
     return SummaryMetrics(
         daily=total_daily,
-        monthly=total_daily * 30,
+        monthly=total_daily * 365 / 12,
         yearly=total_daily * 365,
         population=total_pop,
     )

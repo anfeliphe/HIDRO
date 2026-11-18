@@ -508,8 +508,8 @@ def build_water_demand_report_pdf(data: dict[str, Any], ai_sections: dict[str, s
     story.append(Paragraph("8. Calidad de datos, supuestos y limitaciones", h1))
     story.append(
         Paragraph(
-            "<b>Modelo:</b> Vivienda: habitantes por dotación. Otros usos: cantidad por litros/unidad por días de operación. "
-            "Solo la parte residencial cambia entre 0,09 y 0,1 m³/persona/día. El promedio diario es el volumen anual dividido entre 365. Incluye perfiles provisionales: revise las fichas. No sustituye mediciones ni facturación.",
+            "<b>Modelo:</b> Vivienda: habitantes por dotación. Referencias EAAB: tabla 1 por sector y diámetro (m³/suscriptor/mes); anual equivalente = mensual por 12. La tabla 2 es total de obra y se excluye de demanda recurrente. Otros modelos provisionales: cantidad por litros/unidad por días de operación. "
+            "Solo la parte residencial cambia entre 0,09 y 0,1 m³/persona/día. El promedio diario es el volumen anual dividido entre 365; el mensual es el anual dividido entre 12. Incluye perfiles provisionales: revise las fichas. No sustituye mediciones ni facturación.",
             body,
         )
     )

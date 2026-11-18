@@ -1,8 +1,8 @@
 """Read-only query engine. Receives only rows already authorized for this user."""
 import math
 from app.services.activity_demand import norm
-NUMERIC={'numero_habitantes','numero_familias','horas_servicio','unidades_habitacionales','unidades_no_habitacionales','total_unidades','demanda_diaria_90_m3','demanda_diaria_100_m3'}
-FIELDS=NUMERIC|{'id_predio_demo','id_usuario','fecha_censo','plano','zona','barrio','manzana','municipio','direccion','clase_uso','tipo_actividad','tipo_punto','tiene_agua','tanque_reserva','disponibilidad_cajilla','clasificacion','tiene_medidor','dato_simulado','origen','lat','lng','consumo_con_supuestos'}
+NUMERIC={'numero_habitantes','numero_familias','horas_servicio','unidades_habitacionales','unidades_no_habitacionales','total_unidades','demanda_diaria_90_m3','demanda_diaria_100_m3','consumo_mensual_referencia_m3','consumo_total_obra_m3'}
+FIELDS=NUMERIC|{'id_predio_demo','id_usuario','fecha_censo','plano','zona','barrio','manzana','municipio','direccion','clase_uso','tipo_actividad','tipo_punto','tiene_agua','tanque_reserva','disponibilidad_cajilla','clasificacion','tiene_medidor','dato_simulado','origen','lat','lng','consumo_con_supuestos','metodo_consumo','fuente_consumo'}
 
 def query_records(rows, args):
     filters=args.get('filters') or []

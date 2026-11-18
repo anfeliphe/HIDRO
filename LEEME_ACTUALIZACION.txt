@@ -1,0 +1,46 @@
+HIDRO · Actualización de consumo EAAB · 18/11/2026
+
+CONTENIDO Y PUBLICACIÓN
+Paquete de actualización para el código de HIDRO que veníamos trabajando; incluye el rediseño profesional previo. No es un repositorio completo ni contiene la base de datos. No se ha publicado en Render.
+1. Conserva una copia del repositorio y de la base de datos actual.
+2. Copia el CONTENIDO de src, backend y public sobre las carpetas de igual nombre en la raíz del repositorio. Reemplaza index.html. No elimines los archivos que no aparecen en este paquete. No subas la carpeta contenedora como una subcarpeta del proyecto.
+3. Conserva package.json, requisitos existentes, variables de entorno y credenciales. Este cambio no agrega dependencias de producción.
+4. Publica los cambios en tu repositorio y despliega primero el backend y después el frontend en Render. Verifica que ambos servicios correspondan al mismo código.
+5. No requiere migrar columnas: calculo_eaab se almacena dentro del JSON de cada ficha. No elimina ni recalcula irreversiblemente registros históricos.
+
+CÓMO UTILIZARLO
+Predios > Editar ficha > Consumo · Referencias EAAB > Método del predio.
+- Tabla 1: elige versión, sector económico y diámetro REAL; no se asigna diámetro automáticamente. Comprobar cálculo muestra el valor antes de guardar.
+- SUI: registra promedio comercial EAAB, período, fuente y fecha. Confirma actividad no intensiva, no incluida en anexo, acometida de 1/2 pulgada y máximo tres puntos hidráulicos.
+- Tabla 2: consulta el consumo TOTAL de obra según área. No entra en demanda diaria, mensual ni anual.
+- El modelo provisional HIDRO sigue disponible y las fichas anteriores lo conservan hasta revisión. Calidad de datos muestra los predios no residenciales pendientes de elegir el modelo EAAB.
+La selección EAAB tiene prioridad sobre las actividades provisionales guardadas; no se suman dos modelos. Los factores originales se conservan para poder volver al modelo anterior.
+Consulta las tablas completas y ambos PDF en Ayuda. La ficha de estimación identifica método y fuente. Exportar CSV incluye la configuración EAAB.
+
+MÉTODO Y ALCANCE
+Fuente principal: Resolución 0267 del 29/05/2026, artículos 1 y 2, anexo páginas 7–8. Referencia histórica: Resolución 0464 del 21/06/2024, anexo páginas 8–9.
+La tabla 1 mantiene los mismos 144 valores en ambos documentos: 18 sectores por 8 diámetros. Unidad: m³/suscriptor/mes. No son litros por empleado o por cliente. Los puntos separan miles.
+Ejemplos con acometida 1/2 pulgada: lavadero 99 m³/mes; restaurante 62; supermercado 38; centro educativo 80; clínica/hospital 52.
+Se conserva el valor mensual; anual equivalente = mensual x 12 y promedio diario anual = anual / 365. El mes mostrado ahora equivale a anual / 12, tanto en tablero como en API, chat e informe PDF. No es una estimación de meses reales de operación ni volumen de un período de anomalía.
+Tabla 2 de 2026: hasta 200 m² = 90 m³ totales; >200 hasta 500 = 180; >500 hasta 1000 = 320. Los otros rangos siguen hasta 50.000 m² = 5.200 m³. Versión 2024: hasta 1.000 m² = 320 m³. Se rechaza extrapolar por encima de 50.000 m².
+La selección histórica es explícita. El artículo 3 de 2026 remite a las reglas vigentes al hallazgo para casos anteriores a su publicación. El PDF recibido lleva Registro Distrital 8591 del 01/06/2026; la ficha informativa del portal jurídico consultada muestra 29/05/2026. Por esta discrepancia no se impone automáticamente una versión por fecha; confirmar la fecha jurídicamente aplicable con EAAB si se usa para un caso real.
+
+DATOS QUE NO ESTÁN EN ESTOS PDF
+- Residencial: ambos documentos remiten a NS-031. Los escenarios de 90/100 L/persona/día existentes se conservan expresamente como provisionales, no se presentan como dotaciones oficiales de esa norma. Tampoco se automatiza la comparación histórica de las últimas tres vigencias del numeral 5.1.b.
+- Comercio de bajo consumo: el anexo no fija un promedio SUI. Debe consultarse el más reciente disponible para EAAB/clase comercial al momento correspondiente y documentarlo. No hay sincronización automática con SUI.
+- Mixtos/multiusuario: tabla 1 se aplica por suscriptor. No multiplicar por cada actividad o local que comparte la acometida. El formulario exige confirmar un suscriptor no residencial independiente; el cálculo no agrega la vivienda del predio. El caso residencial con comercio conexo del numeral 5.1.c requiere NS-031 y no se automatiza.
+- Construcción: la consulta de tabla 2 NO es el procedimiento completo de liquidación del numeral 5.3. Para un caso real deben revisarse licencia, TPO, área real, anomalías adicionales, comparación con tabla 1 y fuentes alternas. No suma repetidamente el volumen de obra a los consumos mensuales.
+- No se calculan tarifas, intereses, cargos adicionales ni facturas. El alcance solicitado es actualizar referencias de consumo, no crear un liquidador de cobros.
+
+CSV
+Nueva columna opcional calculo_eaab con JSON. Ejemplo:
+{"version":"2026","metodo":"tabla1","sector":"lavadero","diametro":"1/2"}
+Exportar desde la página produce el escapado CSV necesario. Al importar sobre una ficha existente, omitir la columna conserva su cálculo; incluir null explícito lo retira. Un diámetro desconocido o datos inválidos bloquean la importación. Las verificaciones de duplicados y confirmación se mantienen.
+La tabla CSV de este paquete es solo de consulta; NO es una plantilla de importación de predios.
+
+VERIFICACIÓN
+Pruebas de servidor: desde backend, python -m unittest discover -s tests -v, en un entorno con requirements.txt y httpx==0.27.2 para el cliente de pruebas.
+Interfaz: copia verificacion/tests-ui y verificacion/vitest.config.mjs a la raíz del proyecto. Dependencias de pruebas: vitest@2.1.9, jsdom@25.0.1, @testing-library/react@16.1.0. Ejecuta npx vitest run --config vitest.config.mjs.
+Compilación: npm run build.
+Comprobación tras desplegar: guardar un lavadero de 1/2 pulgada; ficha 99 m³/mes, equivalente anual 1.188 m³; cambiar diámetro a 3/4, ficha 373 m³/mes. Exportar/importar y confirmar los datos. Una obra de 200 m² muestra 90 m³ totales y no se suma a demanda recurrente.
+No se ha verificado el despliegue real ni realizado revisión visual en un navegador de producción.

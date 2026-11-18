@@ -78,6 +78,9 @@ def components_for(r):
     return [dict(actividad=p['id'],cantidad=p['cantidad_defecto'],dias_ano=p['dias_defecto'],litros_unidad=p['litros_unidad'])],True
 
 def estimate(r):
+    if r.get('calculo_eaab'):
+        from .eaab_consumption import calculate
+        return calculate(r['calculo_eaab'],r.get('clase_uso'))
     components,assumed=components_for(r);d90=d100=0;details=[]
     for c in components:
         p=CATALOG[c['actividad']];liters=c['litros_unidad'];qty=c['cantidad'];days=c['dias_ano']
@@ -88,4 +91,4 @@ def estimate(r):
     return dict(demanda_diaria_90_m3=d90 if components else None,demanda_diaria_100_m3=d100 if components else None,
         coeficiente_demanda=None,motivo_sin_demanda='' if components else 'Sin dato de habitantes o actividad',
         componentes_calculo=details,consumo_con_supuestos=assumed,metodo_consumo=VERSION,
-        nota_consumo='Promedio diario anual: suma de cantidad × L/unidad × días/año ÷ 365 ÷ 1000. Solo la parte residencial cambia entre escenarios. '+('Cantidades y mezcla provisionales; revisar en Editar.' if assumed else 'Cantidades informadas; factores de referencia editables.'))
+        nota_consumo='Modelo provisional HIDRO (no corresponde a las tablas EAAB). Actualiza la ficha para usar las resoluciones. Promedio diario anual: suma de cantidad × L/unidad × días/año ÷ 365 ÷ 1000. Solo la parte residencial cambia entre escenarios. '+('Cantidades y mezcla provisionales; revisar en Editar.' if assumed else 'Cantidades informadas; factores de referencia editables.'))

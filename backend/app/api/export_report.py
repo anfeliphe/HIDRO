@@ -133,7 +133,7 @@ async def _gather_report_payload(
         "land_use_filter": lu,
         "summary": {
             "daily": total_daily,
-            "monthly": total_daily * 30,
+            "monthly": total_daily * 365 / 12,
             "yearly": total_daily * 365,
             "population": total_pop,
         },

@@ -208,7 +208,7 @@ const Chat = () => {
                   <Sparkles className="h-7 w-7 text-white" />
                 </div>
                 <h3 className="mb-2 text-xl font-semibold text-gray-900">Conversa con tu territorio</h3>
-                <p className="mx-auto max-w-md text-sm leading-relaxed text-gray-600">
+                <p className="mx-auto max-w-md text-sm leading-relaxed text-gray-600" style={{ marginInline: 'auto' }}>
                   Consulta totales, usos del predio, proyecciones y comparaciones en una conversación.
                 </p>
               </div>
